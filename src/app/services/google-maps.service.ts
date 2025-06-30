@@ -9,10 +9,52 @@ export class GoogleMapsService {
   destinationAutocomplete!: google.maps.places.Autocomplete;
 
   initMap(mapContainer: HTMLElement, center: google.maps.LatLngLiteral = { lat: 4.711, lng: -74.0721 }) {
+    const styles = [
+      {
+        featureType: 'all',
+        elementType: 'all',
+        stylers: [
+          { saturation: -100 },
+          { lightness: 45 },
+          { gamma: 1.0 }
+        ]
+      },
+      {
+        featureType: 'water',
+        elementType: 'geometry',
+        stylers: [{ color: '#e9e9e9' }]
+      },
+      {
+        featureType: 'road',
+        elementType: 'geometry',
+        stylers: [
+          { lightness: 70 },
+          { visibility: 'simplified' }
+        ]
+      },
+      {
+        featureType: 'poi',
+        elementType: 'all',
+        stylers: [{ visibility: 'off' }]
+      },
+      {
+        featureType: 'transit',
+        elementType: 'all',
+        stylers: [{ visibility: 'off' }]
+      }
+    ];
+
     this.map = new google.maps.Map(mapContainer, {
       center,
-      zoom: 13
+      zoom: 13,
+      styles: styles,
+      disableDefaultUI: false,
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: true
     });
+    
     this.directionsRenderer.setMap(this.map);
   }
 

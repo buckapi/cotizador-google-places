@@ -20,7 +20,7 @@ html, body {
   }
   
   .pt-lg-10 {
-    padding-top: 6rem !important; /* 96px - double of p-5 (48px) */
+    padding-top: 5rem !important; /* 96px - double of p-5 (48px) */
   }
 }
 

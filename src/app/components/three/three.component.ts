@@ -46,6 +46,9 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
     { tipo: 'Van 16 asientos', subtipo: 'Van 16 asientos', img: 'assets/img/vehiculos/bus16_standar.png' }
   ];
 
+  // Control para mostrar/ocultar detalles de precios
+  showPriceDetails = false;
+
   viajeData: any = {};
   desgloseTarifa: any = {
     precioBase: 0,
@@ -176,6 +179,11 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
     );
     
     return vehiculo ? vehiculo.img : 'assets/img/vehiculos/default.png';
+  }
+
+  // Alternar visibilidad de los detalles de precios
+  togglePriceDetails(): void {
+    this.showPriceDetails = !this.showPriceDetails;
   }
 
   ngOnDestroy(): void {
