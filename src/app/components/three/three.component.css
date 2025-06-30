@@ -103,8 +103,9 @@ html, body {
   bottom: 0;
   left: 0;
   right: 0;
+  background-color: white;
   z-index: 1030;
-  padding: 0;
+  padding: 14px;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -162,4 +163,35 @@ html, body {
 .mapboxgl-canvas {
   background-color: transparent !important;
   height: 100% !important;
+}
+.btn-warning, .btn-warning:hover, .btn-warning:focus, .btn-warning:active {
+  color: #000000 !important;
+}
+
+.btn-warning:hover {
+  background-color: #d6c500 !important;
+}
+
+/* Map style toggle button */
+.map-style-toggle {
+  top: 15px;
+  right: 15px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 5px 10px;
+  border-radius: 5px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  color: #333;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-style-toggle:hover {
+  color: #000000;
+  background-color: #f8f9fa;
+  border-color: #d6d6d6;
 }

@@ -1,5 +1,7 @@
 <section class="locations-section custom-mobile-pt pt-lg-10">
-  <div class="container-fluid h-100 p-3 ">
+  <div class="container-fluid h-100 p-3 " style="
+  background-color: black;
+">
     <div class="row h-100 flex-column flex-lg-row g-0">
       
       <!-- Panel izquierdo -->
@@ -148,7 +150,7 @@
           
           <!-- Botón de Procesar Solicitud (solo en desktop) -->
           <div class="d-none d-lg-block">
-            <button class="btn btn-warning w-100 mt-3 py-2 fw-bold" (click)="procesarSolicitud()">
+            <button class=" btn-warning w-100 mt-3 py-2 fw-bold" style="display: block; border-radius: 12px;" (click)="procesarSolicitud()">
               PROCESAR SOLICITUD
             </button>
           </div>
@@ -156,17 +158,22 @@
 
         <!-- Botón fijo en móviles -->
         <div class="fixed-bottom-mobile d-lg-none">
-          <button class="btn btn-warning w-100 py-3 fw-bold" (click)="procesarSolicitud()">
+          <button class=" btn-warning w-100 py-3 fw-bold" style="border-radius: 12px;" (click)="procesarSolicitud()">
             PROCESAR SOLICITUD
           </button>
         </div>
       </div>
       <!-- Fin del panel izquierdo -->
 
-      <!-- Panel derecho (mapa) -->
-      <div class="col-12 col-lg-7 p-0">
+      <!-- Mapa (Panel derecho) -->
+      <div class="col-12 col-lg-7 p-0 position-relative">
         <div class="map-container">
           <div #mapRef id="map"></div>
+          <!-- Style Toggle Button -->
+          <button (click)="toggleMapStyles()" class="position-absolute map-style-toggle">
+            <i class="fas me-1" [class.fa-map]="!stylesEnabled" [class.fa-map-marked]="stylesEnabled"></i>
+            {{ stylesEnabled ? 'Estilo Simple' : 'Estilo Detallado' }}
+          </button>
         </div>
       </div>
 

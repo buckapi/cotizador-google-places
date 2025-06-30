@@ -5,8 +5,8 @@ import { CotizadorService } from '../../services/cotizador.service';
 import { TramosService } from '../../services/tramos.service';
 import { combineLatest, Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-
 import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-three',
@@ -27,12 +27,21 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
 
   private tramosService = inject(TramosService);
 
+  stylesEnabled = true;
+
   constructor(
     private googleMapsService: GoogleMapsService,
     private travelDataService: TravelDataService,
     private cotizadorService: CotizadorService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
+
+  toggleMapStyles(): void {
+    this.stylesEnabled = !this.stylesEnabled;
+    this.googleMapsService.toggleMapStyles();
+  }
 
   // Mapeo de imágenes de vehículos
   imagenesVehiculos = [

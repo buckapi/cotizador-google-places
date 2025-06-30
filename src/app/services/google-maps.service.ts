@@ -2,7 +2,21 @@ import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class GoogleMapsService {
-  map!: google.maps.Map;
+  private map!: google.maps.Map;
+  private markers: google.maps.Marker[] = [];
+  private stylesEnabled = true;
+  private mapStyles = [
+    {
+      featureType: 'poi',
+      elementType: 'all',
+      stylers: [{ visibility: 'off' }]
+    },
+    {
+      featureType: 'transit',
+      elementType: 'all',
+      stylers: [{ visibility: 'off' }]
+    }
+  ];
   directionsService = new google.maps.DirectionsService();
   directionsRenderer = new google.maps.DirectionsRenderer();
   originAutocomplete!: google.maps.places.Autocomplete;
@@ -32,22 +46,13 @@ export class GoogleMapsService {
           { visibility: 'simplified' }
         ]
       },
-      {
-        featureType: 'poi',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }]
-      },
-      {
-        featureType: 'transit',
-        elementType: 'all',
-        stylers: [{ visibility: 'off' }]
-      }
+      ...this.mapStyles
     ];
 
     this.map = new google.maps.Map(mapContainer, {
       center,
       zoom: 13,
-      styles: styles,
+      styles: this.stylesEnabled ? styles : [],
       disableDefaultUI: false,
       zoomControl: true,
       mapTypeControl: false,
@@ -61,6 +66,23 @@ export class GoogleMapsService {
   setupAutocomplete(originEl: HTMLInputElement, destinationEl: HTMLInputElement) {
     this.originAutocomplete = new google.maps.places.Autocomplete(originEl);
     this.destinationAutocomplete = new google.maps.places.Autocomplete(destinationEl);
+  }
+
+  toggleMapStyles(): void {
+    this.stylesEnabled = !this.stylesEnabled;
+    if (this.map) {
+      this.map.setOptions({
+        styles: this.stylesEnabled ? [
+          {
+            stylers: [
+              { lightness: 70 },
+              { visibility: 'simplified' }
+            ]
+          },
+          ...this.mapStyles
+        ] : []
+      });
+    }
   }
 
   calcularRuta(callback: (km: number, originText: string, destText: string) => void) {
