@@ -38,28 +38,32 @@
           </div>
         </div>
 
-        <!-- Parte inferior: distancia, vehículo y tarifa -->
-        <div class="row g-3 mb-3">
+        <!-- Info Cards: Distancia, Vehículo y Pasajeros -->
+        <div class="d-flex flex-column flex-md-row flex-wrap g-3 mb-3">
           <!-- Distancia -->
-          <div class="col-12 col-sm-4 mb-3 mb-sm-0">
-            <div class="locations-pin d-flex align-items-center h-100 p-3" style="background-color: #1a1a1a; border-radius: 12px;">
-              <img src="assets/img/distance.png" alt="Distancia" style="height: 40px; margin-right: 10px;">
-              <div>
-                <h6 class="text-light m-0">Distancia</h6>
-                <h4 class="fw-bold text-white m-0">{{ distanciaKm | number:'1.1-2' }} km</h4>
+          <div class="col-12 col-md-4 px-0 px-md-2">
+            <div class="info-card d-flex align-items-center h-100 p-3">
+              <div class="icon-container me-3">
+                <img src="assets/img/distance.png" alt="Distancia" class="info-icon">
+              </div>
+              <div class="info-content">
+                <h6 class="info-label">Distancia</h6>
+                <h4 class="info-value">{{ distanciaKm | number:'1.1-2' }} km</h4>
               </div>
             </div>
           </div>
 
           <!-- Vehículo -->
-          <div class="col-12 col-sm-4 mb-3 mb-sm-0">
-            <div class="locations-pin d-flex align-items-center h-100 p-3" style="background-color: #1a1a1a; border-radius: 12px;">
-              <img [src]="getImagenVehiculo(viajeData.vehiculoSeleccionado, viajeData.vehiculoSubtipoSeleccionado)" 
-                   [alt]="(viajeData.vehiculoSeleccionado || 'Vehículo') + ' ' + (viajeData.vehiculoSubtipoSeleccionado || '')" 
-                   style="height: 40px; margin-right: 10px; object-fit: contain;">
-              <div>
-                <h6 class="text-light m-0">Vehículo</h6>
-                <h4 class="fw-bold text-white text-truncate m-0" style="max-width: 150px;">
+          <div class="col-12 col-md-4 px-0 px-md-2">
+            <div class="info-card d-flex align-items-center h-100 p-3">
+              <div class="icon-container me-3">
+                <img [src]="getImagenVehiculo(viajeData.vehiculoSeleccionado, viajeData.vehiculoSubtipoSeleccionado)" 
+                     [alt]="(viajeData.vehiculoSeleccionado || 'Vehículo')" 
+                     class="info-icon">
+              </div>
+              <div class="info-content">
+                <h6 class="info-label">Vehículo</h6>
+                <h4 class="info-value text-truncate" style="max-width: 150px;">
                   {{ viajeData.vehiculoSeleccionado || 'No seleccionado' }}
                   <span *ngIf="viajeData.vehiculoSubtipoSeleccionado" class="d-block small text-muted">
                     {{ viajeData.vehiculoSubtipoSeleccionado }}
@@ -68,11 +72,16 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-sm-4 mb-3 mb-sm-0">
-            <div class="locations-pin d-flex align-items-center h-100 p-3" style="background-color: #1a1a1a; border-radius: 12px;">
-              <div>
-                <h6 class="text-light m-0">Pasajeros</h6>
-                <h4 class="fw-bold text-white m-0">{{ viajeData.passengerCount }}</h4>
+
+          <!-- Pasajeros -->
+          <div class="col-12 col-md-4 px-0 px-md-2">
+            <div class="info-card d-flex align-items-center h-100 p-3">
+              <div class="icon-container me-3">
+                <i class="fas fa-users info-icon" style="font-size: 1.75rem;"></i>
+              </div>
+              <div class="info-content">
+                <h6 class="info-label">Pasajeros</h6>
+                <h4 class="info-value">{{ viajeData.passengerCount || '0' }}</h4>
               </div>
             </div>
           </div>
@@ -137,8 +146,17 @@
           (ngModelChange)="actualizarNotas($event)">
         </textarea>
           
-          <!-- Botón de Procesar Solicitud -->
-          <button class="btn btn-warning w-100 mt-3 py-2 fw-bold" (click)="procesarSolicitud()">
+          <!-- Botón de Procesar Solicitud (solo en desktop) -->
+          <div class="d-none d-lg-block">
+            <button class="btn btn-warning w-100 mt-3 py-2 fw-bold" (click)="procesarSolicitud()">
+              PROCESAR SOLICITUD
+            </button>
+          </div>
+        </div>
+
+        <!-- Botón fijo en móviles -->
+        <div class="fixed-bottom-mobile d-lg-none">
+          <button class="btn btn-warning w-100 py-3 fw-bold" (click)="procesarSolicitud()">
             PROCESAR SOLICITUD
           </button>
         </div>
