@@ -186,6 +186,14 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
     this.showPriceDetails = !this.showPriceDetails;
   }
 
+  procesarSolicitud(): void {
+    // Aquí puedes agregar la lógica para procesar la solicitud
+    console.log('Procesando solicitud...', this.viajeData);
+    // Ejemplo de redirección o acción:
+    // this.router.navigate(['/confirmacion']);
+    alert('¡Solicitud procesada con éxito!');
+  }
+
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
