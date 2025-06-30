@@ -1,0 +1,219 @@
+<section id="home" class="hero-section" style="background-image: url(assets/img/hero-img.jpg); min-height: 1100px !important;">
+  <div class="container">
+    <div class="hero-section-text" style="padding-top: 150px !important;">
+      <div class="row align-items-start" >
+        <div class="col-lg-5 wow fadeInUp" data-wow-delay=".5s" data-cursor-text='text' >
+          <div class="hero-text">
+            <h1>Cotiza ahora  <span>el costo de tu traslado</span></h1>
+            <div class="form-group">
+              <label>Tipo de servicio</label>
+              <div class="tabtwo nav nav-pills" role="tablist" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button type="button"
+                        class="nav-link tooltip-vehiculo tipo-servicio"
+                        [class.active]="tipoServicio === 'aeropuerto'"
+                        (click)="seleccionarTipoServicio('aeropuerto')">
+                  <img src="assets/img/airport.png" alt="Aeropuerto" style="width: 100%;">
+                  Aeropuerto
+                  <span class="tooltip-text">Desde el aeropuerto a un destino</span>
+                </button>
+            
+                <button type="button"
+                        class="nav-link tooltip-vehiculo tipo-servicio"
+                        [class.active]="tipoServicio === 'punto'"
+                        (click)="seleccionarTipoServicio('punto')">
+                  <img src="assets/img/locationCalc.png" alt="Punto a punto" style="width: 100%;">
+                  Punto a Punto
+                  <span class="tooltip-text">De un punto de origen a uno de destino</span>
+                </button>
+            
+                <button type="button"
+                        class="nav-link tooltip-vehiculo tipo-servicio"
+                        [class.active]="tipoServicio === 'hora'"
+                        (click)="seleccionarTipoServicio('hora')">
+                  <img src="assets/img/timer.png" alt="Por hora" style="width: 100%;">
+                  Por Hora
+                  <span class="tooltip-text">Servicio contratado por horas</span>
+                </button>
+              </div>
+            </div>
+        
+          </div>
+        </div>
+        <div class="col-lg-7 wow fadeInUp" data-wow-delay=".8s">
+          <div class="tabtwo nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical" *ngIf="tipoServicio"> 
+            <button class="nav-link tooltip-vehiculo"
+                    [class.active]="vehiculoDisponible('sedan')">
+              <i class="flaticon-car"></i> Sedán
+              <span class="tooltip-text">Hasta 3 personas y 3 maletas</span>
+            </button>
+          
+            <button class="nav-link tooltip-vehiculo"
+                    [class.active]="vehiculoDisponible('minivan')">
+              <i class="flaticon-minivan"></i> Minivan
+              <span class="tooltip-text">Hasta 6 personas y 6 maletas</span>
+            </button>
+          
+            <button class="nav-link tooltip-vehiculo"
+                    [class.active]="vehiculoDisponible('suv')">
+              <i class="flaticon-off-road"></i> SUV
+              <span class="tooltip-text">Hasta 7 personas y 7 maletas</span>
+            </button>
+          
+            <button class="nav-link tooltip-vehiculo"
+                    [class.active]="vehiculoDisponible('minibus')"
+                    >
+                    <i class="flaticon-van"></i>
+              <!-- <img src="assets/img/bus.png" alt="Minibús" style="height: 25px;width: 25px;"> -->
+              Van 12
+              <span class="tooltip-text">12 personas (1 maleta por persona)</span>
+            </button>
+            <button class="nav-link tooltip-vehiculo"
+            [class.active]="vehiculoDisponible('Van 16 asientos')"
+           >
+                  <i class="flaticon-van"></i>
+            <!-- <img src="assets/img/bus.png" alt="Minibús" style="height: 25px;width: 25px;"> -->
+            Van 19
+            <span class="tooltip-text">16 personas (1 maleta por persona)</span>
+          </button>
+          </div>
+          
+          <div class="tab-content tabtwo" id="v-pills-tabContent">
+            <div class="tab-pane fade show active" id="v-pills-home2" role="tabpanel" aria-labelledby="v-pills-home2-tab"> 
+           
+              <form *ngIf="tipoServicio" (ngSubmit)="$event.preventDefault(); onSubmit()" class="contact-form" #cotizacionForm="ngForm">
+              <div class="tab-content tabtwo">
+                <div class="form-group" *ngIf="tipoServicio">
+                  <label>Vehículo seleccionado: <strong>{{vehiculoSeleccionado | titlecase}}</strong></label>
+                </div>
+
+                <div class="pick-up positrgb(212, 48, 48)ion-relative">
+                <span>Origen</span>
+                <i class="flaticon-aim icon-aim"></i>
+                <input
+                #originInput
+                id="originInput"
+                type="text"
+                [(ngModel)]="origin"
+                name="origin"
+                placeholder="Origen"
+                autocomplete="off"
+                class="form-control"
+                  >
+                <i class="flaticon-search icon-search"></i>
+              </div>
+              
+              <div class="pick-up position-relative" *ngIf="tipoServicio !== 'hora'">
+                <span>Destino</span>
+                <i class="flaticon-aim icon-aim"></i>
+                <input
+                #destinationInput
+                id="destinationInput"
+                type="text"
+                [(ngModel)]="destination"
+                name="destination"
+                placeholder="Destino"
+                autocomplete="off"
+                class="form-control">
+                <i class="flaticon-search icon-search"></i>
+              </div>
+
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="quantity-wrapper">
+                    <label class="quantity-label">Cantidad de pasajeros</label>
+                    <div class="quantity-control">
+                      <button type="button" class="qty-btn" (click)="decreaseCount()">−</button>
+                      <span class="qty-value">{{ passengerCount }}</span>
+                      <button type="button" class="qty-btn" (click)="increaseCount()">+</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="quantity-wrapper">
+                    <label class="quantity-label">Cantidad de maletas</label>
+                    <div class="quantity-control">
+                      <button type="button" class="qty-btn" (click)="decreaseMaletaCount()">−</button>
+                      <span class="qty-value">{{ maletaCount }}</span>
+                      <button type="button" class="qty-btn" (click)="increaseMaletaCount()">+</button>
+                        
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+             
+
+              <div *ngIf="tipoServicio === 'aeropuerto'">
+                <span>Tipo de viaje</span>
+                <ul class="rental-type">
+                  <li><input type="radio" name="tipoViaje" [(ngModel)]="tipoViaje" value="solo_ida" required><label>Solo Ida</label></li>
+                  <li><input type="radio" name="tipoViaje" [(ngModel)]="tipoViaje" value="ida_vuelta"><label>Ida y Vuelta</label></li>
+                </ul>
+                <div class="datatime">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <span>Fecha de Ida</span>
+                      <div class="date-from">
+                        <input type="date" [(ngModel)]="fechaIda" name="fechaIda" required>
+                        <input type="time" [(ngModel)]="horaIda" name="horaIda" required>
+                      </div>
+                    </div>
+                    <div class="col-lg-6" *ngIf="tipoViaje === 'ida_vuelta'">
+                      <span>Fecha de Vuelta</span>
+                      <div class="date-from">
+                        <input type="date" [(ngModel)]="fechaVuelta" name="fechaVuelta" required>
+                        <input type="time" [(ngModel)]="horaVuelta" name="horaVuelta" required>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group" *ngIf="tipoServicio === 'aeropuerto'">
+                  <label>Número de vuelo</label>
+                  <input type="text" 
+                         [(ngModel)]="numeroVuelo" 
+                         name="numeroVuelo" 
+                         class="form-control"
+                         [required]="tipoServicio === 'aeropuerto'">
+                </div>
+              </div>
+
+              <div *ngIf="tipoServicio === 'hora'">
+                <div class="form-group">
+                  <label>Horas contratadas (mínimo 2)</label>
+                  <input type="number" [(ngModel)]="horasContratadas" name="horasContratadas" class="form-control" min="2">
+                </div>
+              </div>
+
+              <button class="btn" type="submit" [disabled]="!cotizacionForm.form.valid">
+                <span>Cotizar ahora</span>
+              </button>
+            </div>
+          </form>
+          </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="img-slider swiper">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide">
+        <div class="img-div">
+          <img src="assets/img/hero-img.jpg" alt="img" style="min-height: 1100px !important;">
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="img-div">
+          <img src="assets/img/hero-img-2.jpg" alt="img">
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="img-div">
+          <img src="assets/img/hero-img-3.jpg" alt="img">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

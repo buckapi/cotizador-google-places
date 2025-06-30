@@ -1,0 +1,104 @@
+<section id="vehiclemodels" class="gap" style="background-color: #f5f5f5;">
+  <div class="container">
+    <div class="heading">
+      <span>Seleccione el vehiculo que más se adapte a sus necesidades</span>
+      <h2>Vehículos disponibles para su <span>traslado</span></h2>
+    </div>
+
+    <div class="d-flex align-items-start justify-content-center">
+      <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+        <div class="vehiculo-subtipos d-flex gap-2 mt-3 flex-wrap justify-content-center">
+          <ng-container *ngFor="let subtipo of subtiposDisponibles">
+            <button class="btn mb-2"
+                    [class.active]="vehiculoSubtipoSeleccionado === subtipo"
+                    (click)="seleccionarSubtipo(subtipo)"
+                    [title]="'Seleccionar ' + subtipo">
+              <span class="text-center" [ngStyle]="{'color': vehiculoSubtipoSeleccionado === subtipo ? 'white' : 'black'}">
+                {{ subtipo | uppercase }}
+                <i *ngIf="vehiculoSubtipoSeleccionado === subtipo" class="fa-solid fa-check ms-2"></i>
+              </span>
+            </button>
+          </ng-container>
+          
+          <div *ngIf="subtiposDisponibles.length === 0" class="w-100 text-center py-2">
+            <p class="text-muted">No hay subtipos disponibles para este vehículo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content mt-4" id="v-pills-tabContent">
+      <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+        <div class="car-hire">
+          <div class="car-data">
+            <h4>{{ vehiculoSeleccionado | titlecase }}</h4>
+            <h3>{{ vehiculoSubtipoSeleccionado | titlecase }}</h3>
+            <p>Vehículo seleccionado</p>
+
+            <h5 *ngIf="tipoServicio === 'punto' || tipoServicio === 'aeropuerto' ">${{ tarifaTotal | number:'1.0-0' }} <span>({{ distanciaKm | number:'1.1-2' }} km)</span></h5>
+            <h5 *ngIf="tipoServicio === 'hora'">
+              ${{ calcularTarifaPorHora(cotizadorService.getDuracionHoras()) | number:'1.0-0' }} <span> ({{ cotizadorService.getDuracionHoras() }}h)</span>
+            </h5>
+            
+            <a href="#" class="btn btn-warning " style="color: black;"><span>Seleccionar ahora</span></a>
+
+            <!-- Detalle de tarifas -->
+        
+
+          </div>
+
+          <div class="car-info">
+            <img [src]="getImagenVehiculo()" alt="img">
+          
+            <!-- Tarifa por hora -->
+            <div class="mt-3" *ngIf="tipoServicio === 'hora' && getTarifaDetalle().hora as h">
+              <p><strong>Tarifa por hora:</strong></p>
+              <ul style="list-style: none;">
+                <li style="font-size: 1rem !important;">
+                  <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
+                  Pasajeros: {{ h.pasajeros }}
+                </li>
+                <li style="font-size: 1rem !important;">
+                  <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
+                  Base (2h / 40 km): ${{ h.base | number:'1.0-0' }}
+                </li>
+                <li style="font-size: 1rem !important;">
+                  <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
+                  Adicional por hora (20 km): ${{ h.adicional | number:'1.0-0' }}
+                </li>
+                <li style="font-size: 1rem !important;">
+                  <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
+                  Máximo: {{ h.tiempoMax }}
+                </li>
+              </ul>
+            </div>
+          
+            <!-- Tarifa por distancia -->
+            <div class="mt-3" *ngIf="(tipoServicio === 'punto' || tipoServicio === 'aeropuerto') && getTarifaDetalle().distancia as d">
+              <p><strong>Tarifa por distancia:</strong></p>
+              <ul style="list-style: none;">
+                <li style="font-size: 1rem !important;">
+                  <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
+                  Pasajeros: {{ d.pasajeros }}
+                </li>
+                <li style="font-size: 1rem !important;">
+                  <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
+                  Maletas: {{ d.maletas }}
+                </li>
+                <li *ngIf="d.base" style="font-size: 1rem !important;">
+                  <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
+                  Base (hasta 10 km): ${{ d.base | number:'1.0-0' }}
+                </li>
+                <li *ngIf="d.adicional" style="font-size: 1rem !important;">
+                  <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
+                  Adicional por km extra: ${{ d.adicional | number:'1.0-0' }}
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

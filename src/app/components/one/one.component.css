@@ -1,0 +1,206 @@
+
+ 
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  z-index: 10;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0;
+  margin: 6px 0 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  font-size: 14px;
+}
+
+.autocomplete-list li {
+  padding: 10px 15px;
+  cursor: pointer; /* ✅ hace clickeables las sugerencias */
+  transition: background-color 0.2s ease;
+}
+
+.autocomplete-list li:hover {
+  background-color: #f1f1f1;
+}
+.autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fffbe6; /* ✅ amarillo muy claro */
+    z-index: 10;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0;
+    margin: 6px 0 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    font-size: 14px;
+  }
+  
+  .autocomplete-list li {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    background-color: #fffbe6; /* ✅ base: amarillo suave */
+    border-bottom: 1px solid #f5f5dc; /* sutil separación */
+  }
+  
+  .autocomplete-list li:hover {
+    background-color: #fdf2c8; /* ✅ hover: amarillo un poco más fuerte */
+  }
+  .quantity-wrapper {
+    margin-top: 20px;
+    text-align: left;
+  }
+  
+  .quantity-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 16px;
+  }
+  
+  .quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .qty-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background-color: #d6c500; /* amarillo elegante */
+    color: #000;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .qty-btn:hover {
+    background-color: #f1b800;
+  }
+  
+  .qty-value {
+    width: 40px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  /* Tooltip container */
+  .tooltip-vehiculo {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    z-index: 99999999;
+  }
+  
+  /* Tooltip text */
+  .tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #d6c500;
+    text-align: center;
+    border-radius: 16px;
+    padding: 8px 12px;
+    position: absolute;
+    z-index: 1000;
+    top: 125%; /* Position above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    white-space: normal;
+    font-size: 18px;
+    line-height: 1.4;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Tooltip arrow */
+  .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+  }
+  
+  /* Show the tooltip text when hovering over the tooltip container */
+  .tooltip-vehiculo:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  /* Adjust for first and last button to prevent tooltip from going off screen */
+  #v-pills-tab button:first-child .tooltip-text,
+  #v-pills-tab button:last-child .tooltip-text {
+    left: auto;
+    right: 50%;
+    transform: translateX(50%);
+  }
+  
+  #v-pills-tab button:first-child .tooltip-text::after,
+  #v-pills-tab button:last-child .tooltip-text::after {
+    left: auto;
+    right: 50%;
+    transform: translateX(50%);
+  }
+  .flaticon-minivan::before {
+    content: "\f103";
+  }
+  .hero-text {
+    padding-top: 0 !important;
+  }
+  .tipo-servicio {
+    min-height: 150px !important;
+    width: 130px  ; /* Valor por defecto para desktop */
+  }
+  
+  
+  /* Estilo para móviles (por ejemplo, pantallas <= 768px) */
+  @media (max-width: 768px) {
+    .tipo-servicio {
+      width: 100px !important;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .hero-text h1 {
+      font-size: 1.5rem;
+    }
+  
+    .tabtwo {
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  
+    .nav-link.tipo-servicio {
+      width: 80px;
+      font-size: 0.7rem;
+    }
+  }
+  .vehiculo-toast {
+    z-index: 10010 !important; /* mayor que el header */
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+    backdrop-filter: blur(6px);
+    background-color: rgba(50, 50, 50, 0.85);
+  }
+  

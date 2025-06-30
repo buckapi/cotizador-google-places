@@ -1,0 +1,75 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Custom padding classes */
+.custom-mobile-pt {
+  padding-top: 150px;
+}
+
+.pt-lg-10 {
+  padding-top: 0;
+}
+
+@media (min-width: 992px) {
+  .custom-mobile-pt {
+    padding-top: 0;
+  }
+  
+  .pt-lg-10 {
+    padding-top: 6rem !important; /* 96px - double of p-5 (48px) */
+  }
+}
+
+.locations-section {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.container-fluid, .row {
+  flex: 1;
+  height: 100%;
+}
+
+.row {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.col-lg-5,
+.col-lg-7 {
+  height: 100%;
+}
+
+.col-lg-5 {
+  background-color: #000;
+  color: #fff;
+  overflow-y: auto;
+}
+
+.heading.two h2 {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.map-container {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+#map {
+  height: 100%;
+  width: 100%;
+  display: block;
+}
+
+.mapboxgl-canvas {
+  background-color: transparent !important;
+  height: 100% !important;
+}

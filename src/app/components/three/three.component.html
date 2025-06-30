@@ -1,0 +1,102 @@
+<section class="locations-section custom-mobile-pt pt-lg-10">
+  <div class="container-fluid h-100 p-3 p-lg-5">
+    <div class="row h-100 flex-column flex-lg-row g-0">
+      
+      <!-- Panel izquierdo -->
+      <div class="col-12 col-lg-5 d-flex flex-column justify-content-between p-4 bg-dark text-white">
+        
+        <!-- Parte superior: título y anotaciones -->
+        <div>
+          <div class="heading two mb-4">
+            <span class="text-uppercase text-muted small">Detalles de su viaje</span>
+            <h2 class="mb-4">Resumen del <span class="text-warning">traslado</span></h2>
+          </div>
+
+          <!-- Información del viaje -->
+          <div class="mb-4 p-3" style="background-color: #1a1a1a; border-radius: 12px;">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Tipo de servicio:</span>
+              <span class="text-white">{{ viajeData.tipoServicio || 'No especificado' | titlecase }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Vehículo:</span>
+              <span class="text-white">{{ viajeData.vehiculoSeleccionado || 'No especificado' }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2" *ngIf="viajeData.fechaIda">
+              <span class="text-muted">Fecha:</span>
+              <span class="text-white">{{ viajeData.fechaIda }} {{ viajeData.horaIda || '' }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2" *ngIf="viajeData.fechaVuelta && viajeData.tipoViaje === 'ida_vuelta'">
+              <span class="text-muted">Fecha de retorno:</span>
+              <span class="text-white">{{ viajeData.fechaVuelta }} {{ viajeData.horaVuelta || '' }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2" *ngIf="viajeData.numeroVuelto">
+              <span class="text-muted">N° de vuelo:</span>
+              <span class="text-white">{{ viajeData.numeroVuelo }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">Pasajeros:</span>
+              <span class="text-white">{{ viajeData.passengerCount || 1 }}</span>
+            </div>
+          </div>
+
+          <textarea 
+            class="form-control mb-4" 
+            placeholder="¿Alguna indicación adicional para el conductor?"
+            style="border: 2px solid #d6c500; background-color: #ffffff2a; color: white; resize: none; border-radius: 12px; min-height: 100px;"
+            [(ngModel)]="viajeData.notas"
+            (ngModelChange)="actualizarNotas($event)">
+          </textarea>
+
+          <div class="location-info mb-3">
+            <div class="d-flex align-items-center mb-2">
+              <img src="assets/img/blue.png" alt="Origen" style="height: 24px; margin-right: 10px;">
+              <span class="fw-bold text-uppercase">Origen</span>
+            </div>
+            <div class="text-light small">
+              {{ origenTexto }}
+            </div>
+          </div>
+
+          <div class="location-info mb-3">
+            <div class="d-flex align-items-center mb-2">
+              <img src="assets/img/red.png" alt="Destino" style="height: 24px; margin-right: 10px;">
+              <span class="fw-bold text-uppercase">Destino</span>
+            </div>
+            <div class="text-light small">
+              {{ destinoTexto }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Parte inferior: distancia y tarifa -->
+        <div>
+          <div class="locations-pin d-flex align-items-center mb-3">
+            <img src="assets/img/distance.png" alt="Distancia" style="height: 40px; margin-right: 10px;">
+            <div>
+              <h6 class="text-light m-0">Distancia</h6>
+              <h4 class="fw-bold text-white">{{ distanciaKm | number:'1.1-2' }} km</h4>
+            </div>
+          </div>
+
+          <div class="locations-pin d-flex align-items-center">
+            <img src="assets/img/distance.png" alt="Tarifa" style="height: 40px; margin-right: 10px;">
+            <div>
+              <h6 class="text-light m-0">Tarifa</h6>
+              <h4 class="fw-bold text-white">{{ tarifaTotal | number:'1.1-2' }} $</h4>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Panel derecho (mapa) -->
+      <div class="col-12 col-lg-7 p-0">
+        <div class="map-container">
+          <div #mapRef id="map"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

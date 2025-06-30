@@ -1,0 +1,51 @@
+<header id="stickyHeader" style="position: fixed; top: 0; width: 100%; z-index: 9999;">
+
+    <div class="header-top-bar">
+      <div class="container"> 
+        <div class="bottom-bar">
+          <div class="logo">
+            <a href="index.html#">
+              <img alt="logo" 
+              src="assets/img/logo.png"
+               
+              >
+            </a>
+          </div>
+          <nav> 
+  
+          </nav>
+          <div class="login">
+            <a class="register" style="color: #d6c500;
+            font-weight: bold;
+            font-size: 26px;
+            cursor: pointer;
+            "
+            (click)="virtualRouterService.setActiveRoute('one')"
+            ><span>
+              1 </span></a>
+             <a style="color: #ffffff;
+            font-weight: bold;
+            font-size: 26px;
+            margin-left: 30px;
+            cursor: pointer;
+            "
+            (click)="virtualRouterService.setActiveRoute('two')"
+            >
+              <!-- <i class="flaticon-internet"></i> -->
+               2</a>
+              <a style="color: #ffffff;
+            font-weight: bold;
+            margin-left: 30px;
+            font-size: 26px;
+            cursor: pointer;
+            "
+            (click)="virtualRouterService.setActiveRoute('three')"
+            >
+                <!-- <i class="flaticon-internet"></i> -->
+                3</a>
+
+            </div>
+        </div>
+      </div>
+    </div>
+  </header>
