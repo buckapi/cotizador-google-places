@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CotizadorService } from '../../services/cotizador.service';
 import { TramosService } from '../../services/tramos.service';
+import { VirtualRouterService } from '../../services/virtual-router.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-two',
@@ -14,26 +16,29 @@ import { TramosService } from '../../services/tramos.service';
 export class TwoComponent implements OnInit {
   tipoServicio: 'hora' | 'punto' | 'aeropuerto' = 'punto'; // default
 
-tarifaAeropuerto = 8000; // o el valor que definas como fijo
-distanciaKm = 0;
-tiempoMaximo = 24;
-tarifaTotal = 0;
-duracionHoras = 2;
-constructor(
-  public cotizadorService: CotizadorService,
-  private tramosService: TramosService
-){}
-obtenerClaveVehiculo(tipo: string, subtipo: string): string {
-  const normalizar = (txt: string) => txt.toLowerCase().replace(/\s+/g, '_');
+  tarifaAeropuerto = 8000; // o el valor que definas como fijo
+  distanciaKm = 0;
+  tiempoMaximo = 24;
+  tarifaTotal = 0;
+  duracionHoras = 2;
+  constructor(
+    public cotizadorService: CotizadorService,
+    private tramosService: TramosService,
+    private virtualRouter: VirtualRouterService,
+    private router: Router
+  ) {}
+  obtenerClaveVehiculo(tipo: string, subtipo: string): string {
+    const normalizar = (txt: string) => txt.toLowerCase().replace(/\s+/g, '_');
 
-  if (tipo === 'minibus' && subtipo === 'Van 12 asientos') return 'minibus_12';
-  if (tipo === 'Van 16 asientos') return 'minibus_19';
+    if (tipo === 'minibus' && subtipo === 'Van 12 asientos') return 'minibus_12';
+    if (tipo === 'Van 16 asientos') return 'minibus_19';
 
-  return `${normalizar(tipo)}_${normalizar(subtipo)}`;
-}
+    return `${normalizar(tipo)}_${normalizar(subtipo)}`;
+  }
 
 
   vehiculoSeleccionado: string = 'sedan'; // This will be set from the first step
+  vehiculoSubtipoSeleccionado: 'estandar' | 'espacioso' | 'premium' | 'Van 12 asientos' | 'Van 16 asientos' = 'estandar';
 
   tarifasHora = [
     { tipo: 'sedan', subtipo: 'estandar', pasajeros: 3, base: 1500, adicional: 750, tiempoMax: '24 h' },
@@ -105,8 +110,6 @@ obtenerClaveVehiculo(tipo: string, subtipo: string): string {
   
     
   
-  vehiculoSubtipoSeleccionado: 'estandar' | 'espacioso' | 'premium' | 'Van 12 asientos' | 'Van 16 asientos' = 'estandar';
-
   imagenesVehiculos = [
     { tipo: 'sedan', subtipo: 'estandar', img: 'assets/img/vehiculos/sedan_standar.png' },
     { tipo: 'sedan', subtipo: 'espacioso', img: 'assets/img/vehiculos/sedan_espacioso.png' },
@@ -132,30 +135,125 @@ obtenerClaveVehiculo(tipo: string, subtipo: string): string {
     const dataRaw = localStorage.getItem('datosCotizador');
     if (dataRaw) {
       const data = JSON.parse(dataRaw);
-      this.vehiculoSeleccionado = data.vehiculo || 'sedan'; 
-      this.vehiculoSubtipoSeleccionado = data.vehiculoSubtipoSeleccionado || 'estandar';
+      
+      // Actualizar primero el tipo de servicio
       this.tipoServicio = data.tipoServicio || 'punto';
       this.distanciaKm = this.cotizadorService.getDistanciaKm();
-
-      // Ensure the selected subtipo is valid for the selected vehicle
-      const subtiposValidos = this.subtiposDisponibles;
-      if (!subtiposValidos.includes(this.vehiculoSubtipoSeleccionado)) {
-        this.vehiculoSubtipoSeleccionado = subtiposValidos[0] || 'estandar';
+      
+      // Obtener vehículos disponibles según pasajeros y maletas
+      const vehiculosDisponibles = this.getVehiculosDisponibles();
+      const tiposDisponibles = [...new Set(vehiculosDisponibles.map(v => v.tipo))];
+      
+      // Si el vehículo guardado no está disponible, seleccionar el primero disponible
+      if (!tiposDisponibles.includes(data.vehiculo)) {
+        this.vehiculoSeleccionado = tiposDisponibles[0] || 'sedan';
+      } else {
+        this.vehiculoSeleccionado = data.vehiculo || 'sedan';
       }
-
+      
+      // Obtener subtipos disponibles para el vehículo seleccionado
+      const subtiposValidos = this.subtiposDisponibles;
+      
+      // Si el subtipo guardado no está disponible, seleccionar el primero disponible
+      if (!subtiposValidos.includes(data.vehiculoSubtipoSeleccionado)) {
+        this.vehiculoSubtipoSeleccionado = subtiposValidos[0] || 'estandar';
+      } else {
+        this.vehiculoSubtipoSeleccionado = data.vehiculoSubtipoSeleccionado || 'estandar';
+      }
+      
       this.actualizarTarifaTotal();
+      
+      // Guardar la selección actualizada
+      this.guardarSeleccion();
     }
   }
 
 
+  getPasajerosYMaletas() {
+    const dataRaw = localStorage.getItem('datosCotizador');
+    if (!dataRaw) return { pasajeros: 1, maletas: 0 };
+    
+    const data = JSON.parse(dataRaw);
+    return {
+      pasajeros: data.passengerCount || 1,
+      maletas: data.maletaCount || 0
+    };
+  }
+
+  seleccionarTipoVehiculo(tipo: string) {
+    if (this.vehiculoSeleccionado === tipo) return;
+    
+    this.vehiculoSeleccionado = tipo;
+    
+    // Actualizar el subtipo al primer disponible
+    const subtipos = this.subtiposDisponibles;
+    if (subtipos.length > 0) {
+      this.vehiculoSubtipoSeleccionado = subtipos[0];
+    }
+    
+    this.actualizarTarifaTotal();
+    this.guardarSeleccion();
+  }
+
+  getVehiculosDisponibles() {
+    const dataRaw = localStorage.getItem('datosCotizador');
+    if (!dataRaw) return [];
+    
+    const data = JSON.parse(dataRaw);
+    const pasajeros = data.passengerCount || 1;
+    const maletas = data.maletaCount || 0;
+    
+    // Capacidad de cada tipo de vehículo (pasajeros, maletas)
+    const capacidadVehiculos = [
+      { tipo: 'sedan', subtipo: 'estandar', pasajeros: 3, maletas: 2 },
+      { tipo: 'sedan', subtipo: 'espacioso', pasajeros: 3, maletas: 3 },
+      { tipo: 'sedan', subtipo: 'premium', pasajeros: 3, maletas: 3 },
+      { tipo: 'minivan', subtipo: 'estandar', pasajeros: 6, maletas: 4 },
+      { tipo: 'minivan', subtipo: 'premium', pasajeros: 6, maletas: 6 },
+      { tipo: 'suv', subtipo: 'premium', pasajeros: 7, maletas: 5 },
+      { tipo: 'minibus', subtipo: 'Van 12 asientos', pasajeros: 12, maletas: 10 },
+      { tipo: 'Van 16 asientos', subtipo: 'Van 16 asientos', pasajeros: 16, maletas: 15 }
+    ];
+    
+    // Filtrar vehículos que puedan acomodar a los pasajeros y maletas
+    return capacidadVehiculos.filter(v => 
+      v.pasajeros >= pasajeros && v.maletas >= maletas
+    );
+  }
+  
   get subtiposDisponibles(): Array<'estandar' | 'espacioso' | 'premium' | 'Van 12 asientos' | 'Van 16 asientos'> {
-    return this.imagenesVehiculos
+    const vehiculosDisponibles = this.getVehiculosDisponibles();
+    return [...new Set(vehiculosDisponibles
       .filter(v => v.tipo === this.vehiculoSeleccionado)
-      .map(v => v.subtipo as any);
+      .map(v => v.subtipo))] as any;
+  }
+  
+  get tiposVehiculosDisponibles() {
+    const vehiculosDisponibles = this.getVehiculosDisponibles();
+    return [...new Set(vehiculosDisponibles.map(v => v.tipo))];
   }
   seleccionarSubtipo(subtipo: 'estandar' | 'espacioso' | 'premium' | 'Van 12 asientos' | 'Van 16 asientos') {
     this.vehiculoSubtipoSeleccionado = subtipo;
     this.actualizarTarifaTotal();
+    this.guardarSeleccion();
+  }
+
+  guardarSeleccion() {
+    // Save to local storage
+    const datosGuardados = JSON.parse(localStorage.getItem('datosCotizador') || '{}');
+    datosGuardados.vehiculoSeleccionado = this.vehiculoSeleccionado;
+    datosGuardados.vehiculoSubtipoSeleccionado = this.vehiculoSubtipoSeleccionado;
+    datosGuardados.tarifaTotal = this.tipoServicio === 'hora' 
+      ? this.calcularTarifaPorHora(this.cotizadorService.getDuracionHoras())
+      : this.tarifaTotal;
+    
+    localStorage.setItem('datosCotizador', JSON.stringify(datosGuardados));
+  }
+
+  seleccionarAhora() {
+    this.guardarSeleccion();
+    this.virtualRouter.setActiveRoute('three');
+    this.router.navigate(['/three']);
   }
   
 

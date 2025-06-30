@@ -19,6 +19,10 @@ export class TramosService {
 
   constructor(private http: HttpClient) {}
 
+  getTramos(): Tramo[] {
+    return [...this.tramos]; // Return a copy to prevent direct modifications
+  }
+
   async cargarTramos(): Promise<void> {
     this.tramos = await firstValueFrom(this.http.get<Tramo[]>(this.endpoint));
   }

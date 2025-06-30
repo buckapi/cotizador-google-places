@@ -1,0 +1,53 @@
+/* Base styles for step buttons */
+.step-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 26px;
+  text-decoration: none;
+  margin-left: 30px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+/* Active state styles */
+.step-button.active-route {
+  color: #000000;
+  border-color: #000000;
+  background-color: #ffffff;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .step-button {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+    margin-left: 15px;
+  }
+  
+  .logo img {
+    max-width: 120px;
+  }
+}
+
+/* Ensure buttons are visible on small screens */
+@media (max-width: 480px) {
+  .step-button {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    margin-left: 10px;
+  }
+  
+  .logo img {
+    max-width: 100px;
+  }
+}

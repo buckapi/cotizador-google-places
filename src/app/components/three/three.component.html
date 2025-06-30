@@ -1,5 +1,5 @@
 <section class="locations-section custom-mobile-pt pt-lg-10">
-  <div class="container-fluid h-100 p-3 p-lg-5">
+  <div class="container-fluid h-100 p-3 ">
     <div class="row h-100 flex-column flex-lg-row g-0">
       
       <!-- Panel izquierdo -->
@@ -7,13 +7,13 @@
         
         <!-- Parte superior: título y anotaciones -->
         <div>
-          <div class="heading two mb-4">
+          <div class="heading two ">
             <span class="text-uppercase text-muted small">Detalles de su viaje</span>
-            <h2 class="mb-4">Resumen del <span class="text-warning">traslado</span></h2>
+            <h2 class="">Resumen del <span class="text-warning">traslado</span></h2>
           </div>
 
           <!-- Información del viaje -->
-          <div class="mb-4 p-3" style="background-color: #1a1a1a; border-radius: 12px;">
+          <div class=" p-3" style="background-color: #1a1a1a; border-radius: 12px;">
             <div class="d-flex justify-content-between mb-2">
               <span class="text-muted">Tipo de servicio:</span>
               <span class="text-white">{{ viajeData.tipoServicio || 'No especificado' | titlecase }}</span>
@@ -69,26 +69,80 @@
           </div>
         </div>
 
-        <!-- Parte inferior: distancia y tarifa -->
-        <div>
-          <div class="locations-pin d-flex align-items-center mb-3">
-            <img src="assets/img/distance.png" alt="Distancia" style="height: 40px; margin-right: 10px;">
-            <div>
-              <h6 class="text-light m-0">Distancia</h6>
-              <h4 class="fw-bold text-white">{{ distanciaKm | number:'1.1-2' }} km</h4>
+        <!-- Parte inferior: distancia, vehículo y tarifa -->
+        <div class="row g-3 mb-3">
+          <!-- Distancia -->
+          <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+            <div class="locations-pin d-flex align-items-center h-100 p-3" style="background-color: #1a1a1a; border-radius: 12px;">
+              <img src="assets/img/distance.png" alt="Distancia" style="height: 40px; margin-right: 10px;">
+              <div>
+                <h6 class="text-light m-0">Distancia</h6>
+                <h4 class="fw-bold text-white m-0">{{ distanciaKm | number:'1.1-2' }} km</h4>
+              </div>
             </div>
           </div>
 
-          <div class="locations-pin d-flex align-items-center">
-            <img src="assets/img/distance.png" alt="Tarifa" style="height: 40px; margin-right: 10px;">
-            <div>
-              <h6 class="text-light m-0">Tarifa</h6>
-              <h4 class="fw-bold text-white">{{ tarifaTotal | number:'1.1-2' }} $</h4>
+          <!-- Vehículo -->
+          <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+            <div class="locations-pin d-flex align-items-center h-100 p-3" style="background-color: #1a1a1a; border-radius: 12px;">
+              <img [src]="getImagenVehiculo(viajeData.vehiculoSeleccionado, viajeData.vehiculoSubtipoSeleccionado)" 
+                   [alt]="(viajeData.vehiculoSeleccionado || 'Vehículo') + ' ' + (viajeData.vehiculoSubtipoSeleccionado || '')" 
+                   style="height: 40px; margin-right: 10px; object-fit: contain;">
+              <div>
+                <h6 class="text-light m-0">Vehículo</h6>
+                <h4 class="fw-bold text-white text-truncate m-0" style="max-width: 150px;">
+                  {{ viajeData.vehiculoSeleccionado || 'No seleccionado' }}
+                  <span *ngIf="viajeData.vehiculoSubtipoSeleccionado" class="d-block small text-muted">
+                    {{ viajeData.vehiculoSubtipoSeleccionado }}
+                  </span>
+                </h4>
+              </div>
             </div>
           </div>
+
+          <!-- Tarifa -->
+         
         </div>
 
+        <!-- Desglose de la tarifa -->
+        <div class="tarifa-detalle mb-3 p-3" style="background-color: #1a1a1a; border-radius: 12px;">
+          <h6 class="text-warning mb-3">Desglose de la tarifa</h6>
+          
+          <!-- Precio base (0-10km) -->
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Precio base (0-10 km):</span>
+            <span class="text-white">{{ desgloseTarifa.precioBase | number:'1.2-2' }} $</span>
+          </div>
+          
+          <!-- KM extras si aplica -->
+          <div *ngIf="desgloseTarifa.kmExtras > 0" class="d-flex justify-content-between mb-2">
+            <div>
+              <div class="text-muted">KM adicionales:</div>
+              <div class="small text-muted">{{ desgloseTarifa.kmExtras | number:'1.2-2' }} km x {{ desgloseTarifa.precioPorKm | number:'1.2-2' }} $/km</div>
+            </div>
+            <span class="text-white">{{ (desgloseTarifa.kmExtras * desgloseTarifa.precioPorKm) | number:'1.2-2' }} $</span>
+          </div>
+          
+          <!-- Subtotal -->
+          <div class="d-flex justify-content-between mb-2 pt-2 border-top border-secondary">
+            <span class="text-muted">Subtotal:</span>
+            <span class="text-white">{{ desgloseTarifa.subtotal | number:'1.2-2' }} $</span>
+          </div>
+          
+          <!-- IVA -->
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">IVA (16%):</span>
+            <span class="text-white">{{ desgloseTarifa.iva | number:'1.2-2' }} $</span>
+          </div>
+          
+          <!-- Total -->
+          <div class="d-flex justify-content-between mb-0 pt-2 border-top border-secondary">
+            <span class="fw-bold">Total:</span>
+            <span class="fw-bold text-warning">{{ desgloseTarifa.total | number:'1.2-2' }} $</span>
+          </div>
+        </div>
       </div>
+      <!-- Fin del panel izquierdo -->
 
       <!-- Panel derecho (mapa) -->
       <div class="col-12 col-lg-7 p-0">

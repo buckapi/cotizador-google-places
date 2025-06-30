@@ -1,27 +1,50 @@
 <section id="vehiclemodels" class="gap" style="background-color: #f5f5f5;">
   <div class="container">
     <div class="heading">
-      <span>Seleccione el vehiculo que más se adapte a sus necesidades</span>
+      <span>Seleccione el vehículo que más se adapte a sus necesidades</span>
       <h2>Vehículos disponibles para su <span>traslado</span></h2>
+      
+    
+      
     </div>
 
+    <!-- Contenedor de subtipos de vehículos -->
+    <div class="mb-4 d-flex justify-content-center">
+      <div class="d-flex flex-wrap gap-2">
+        <ng-container *ngFor="let subtipo of subtiposDisponibles">
+          <button class="btn mb-2 "
+                  [class.active]="vehiculoSubtipoSeleccionado === subtipo"
+                  (click)="seleccionarSubtipo(subtipo)"
+                  [title]="'Seleccionar ' + subtipo"
+                  style="border: 1px solid black; "
+                  [ngStyle]="{'background-color': vehiculoSubtipoSeleccionado === subtipo ? '#d6c500' : 'white'}">
+            <span class="text-center" [ngStyle]="{'color': vehiculoSubtipoSeleccionado === subtipo ? 'black' : 'black'
+              
+            }">
+              {{ subtipo | titlecase }}
+              <i *ngIf="vehiculoSubtipoSeleccionado === subtipo" class="fa-solid fa-check ms-2"></i>
+            </span>
+          </button>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Subtipos del vehículo seleccionado -->
     <div class="d-flex align-items-start justify-content-center">
-      <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+      <div class="nav flex-column nav-pills w-100" id="v-pills-tab" role="tablist" aria-orientation="vertical">
         <div class="vehiculo-subtipos d-flex gap-2 mt-3 flex-wrap justify-content-center">
-          <ng-container *ngFor="let subtipo of subtiposDisponibles">
-            <button class="btn mb-2"
-                    [class.active]="vehiculoSubtipoSeleccionado === subtipo"
-                    (click)="seleccionarSubtipo(subtipo)"
-                    [title]="'Seleccionar ' + subtipo">
-              <span class="text-center" [ngStyle]="{'color': vehiculoSubtipoSeleccionado === subtipo ? 'white' : 'black'}">
-                {{ subtipo | uppercase }}
-                <i *ngIf="vehiculoSubtipoSeleccionado === subtipo" class="fa-solid fa-check ms-2"></i>
-              </span>
-            </button>
-          </ng-container>
+         
           
-          <div *ngIf="subtiposDisponibles.length === 0" class="w-100 text-center py-2">
-            <p class="text-muted">No hay subtipos disponibles para este vehículo</p>
+          <div *ngIf="subtiposDisponibles.length === 0" class="w-100 text-center py-4">
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              No hay vehículos disponibles que cumplan con los requisitos de pasajeros y maletas.
+              <div class="mt-2">
+                <a routerLink="/one" class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-arrow-left me-1"></i> Volver y ajustar
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -40,7 +63,7 @@
               ${{ calcularTarifaPorHora(cotizadorService.getDuracionHoras()) | number:'1.0-0' }} <span> ({{ cotizadorService.getDuracionHoras() }}h)</span>
             </h5>
             
-            <a href="#" class="btn btn-warning " style="color: black;"><span>Seleccionar ahora</span></a>
+            <button (click)="seleccionarAhora()" class="btn btn-warning" style="color: black;"><span>Seleccionar ahora</span></button>
 
             <!-- Detalle de tarifas -->
         
