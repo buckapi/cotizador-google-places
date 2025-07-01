@@ -127,6 +127,10 @@ export class OneComponent implements OnInit, AfterViewInit {
     }
   }
 
+  hasOriginAndDestination(): boolean {
+    return !!this.origin && !!this.destination;
+  }
+
   resetForm(): void {
     // Clear the form and submission state
     this.clearSubmissionState();
