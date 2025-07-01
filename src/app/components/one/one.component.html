@@ -83,7 +83,7 @@
               <form *ngIf="tipoServicio" (ngSubmit)="onSubmit($event)" class="contact-form" #cotizacionForm="ngForm">
               <div class="tab-content tabtwo">
                 <div class="form-group" *ngIf="tipoServicio">
-                  <label>Tipo de vehículo indicado: <strong>{{vehiculoSeleccionado | titlecase}}</strong></label>
+                  <label>Vehículo seleccionado: <strong>{{vehiculoSeleccionado | titlecase}}</strong></label>
                 </div>
 
                 <div class="pick-up positrgb(212, 48, 48)ion-relative">
@@ -195,7 +195,7 @@
                 </div>
               </div>
 
-              <div class="button-container" [class.has-tooltip]="hasExistingFormData()" *ngIf="hasOriginAndDestination()">
+              <div class="button-container" [class.has-tooltip]="hasExistingFormData()">
                 <button 
                   class="btn" 
                   type="submit" 
