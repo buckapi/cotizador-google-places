@@ -1,4 +1,6 @@
-/* Base styles for step buttons */
+/* ------------------------------
+   Step Button Base Styles
+---------------------------------*/
 .step-button {
   display: inline-flex;
   align-items: center;
@@ -10,21 +12,120 @@
   color: #ffffff;
   font-weight: bold;
   font-size: 26px;
-  text-decoration: none;
   margin-left: 30px;
   cursor: pointer;
   border: 2px solid transparent;
   transition: all 0.3s ease;
 }
 
-/* Active state styles */
 .step-button.active-route {
   color: #000000;
-  border-color: #000000;
   background-color: #ffffff;
+  border-color: #000000;
 }
 
-/* Mobile responsiveness */
+/* ------------------------------
+   SweetAlert2 Base Button Styles
+---------------------------------*/
+.swal2-styled.btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  box-shadow: none !important;
+}
+
+/* Override default SweetAlert button text color */
+.swal2-styled.btn,
+.swal2-styled.btn:hover,
+.swal2-styled.btn:focus,
+.swal2-styled.btn:active {
+  color: #000000 !important;
+}
+
+/* Confirm Button - Dark Theme */
+.btn.btn-dark {
+  background-color: #000000;
+  color: #ffffff;
+  border: 2px solid #000000;
+}
+
+.btn.btn-dark:hover {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #000000;
+}
+
+/* Cancel Button - Outline Theme */
+.btn.btn-outline-dark {
+  background-color: transparent;
+  color: #000000;
+  border: 2px solid #000000;
+}
+
+.btn.btn-outline-dark:hover {
+  background-color: #f8f9fa;
+  color: #000000;
+}
+
+/* ------------------------------
+   Custom SweetAlert Buttons
+---------------------------------*/
+.swal2-confirm-custom,
+.swal2-cancel-custom,
+.confirmar,
+.cancelar {
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: none !important;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin: 0 5px;
+}
+
+.swal2-confirm-custom,
+.confirmar {
+  background-color: #000;
+  color: #fff;
+  border: 2px solid #000;
+}
+
+.swal2-confirm-custom:hover,
+.confirmar:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+.swal2-cancel-custom,
+.cancelar {
+  background-color: transparent;
+  color: #000;
+  border: 2px solid #000;
+}
+
+.cancelar:hover {
+  background-color: #f8f9fa;
+  color: #000;
+}
+
+.swal2-cancel-custom:hover {
+  background-color: #f1f1f1;
+}
+
+/* ------------------------------
+   Hover Effects for All .btn
+---------------------------------*/
+.btn:hover::before,
+.btn:hover::after {
+  color: #000 !important;
+}
+
+/* ------------------------------
+   Responsiveness
+---------------------------------*/
 @media (max-width: 768px) {
   .step-button {
     width: 36px;
@@ -32,13 +133,12 @@
     font-size: 22px;
     margin-left: 15px;
   }
-  
+
   .logo img {
     max-width: 120px;
   }
 }
 
-/* Ensure buttons are visible on small screens */
 @media (max-width: 480px) {
   .step-button {
     width: 32px;
@@ -46,7 +146,7 @@
     font-size: 18px;
     margin-left: 10px;
   }
-  
+
   .logo img {
     max-width: 100px;
   }

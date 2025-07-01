@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import Swal from 'sweetalert2';
 
 @Injectable({ providedIn: 'root' })
 export class GoogleMapsService {
@@ -85,7 +86,7 @@ export class GoogleMapsService {
     }
   }
 
-  calcularRuta(callback: (km: number, originText: string, destText: string) => void) {
+  async calcularRuta(callback: (km: number, originText: string, destText: string) => void) {
     const originPlace = this.originAutocomplete.getPlace();
     const destinationPlace = this.destinationAutocomplete.getPlace();
   
@@ -93,7 +94,16 @@ export class GoogleMapsService {
     const destinationLoc = destinationPlace?.geometry?.location;
   
     if (!originLoc || !destinationLoc || !originPlace.formatted_address || !destinationPlace.formatted_address) {
-      alert('Debes seleccionar origen y destino válidos desde las sugerencias.');
+      await Swal.fire({
+        title: 'Validación requerida',
+        text: 'Debes seleccionar origen y destino válidos desde las sugerencias.',
+        icon: 'warning',
+        confirmButtonText: 'Entendido',
+        buttonsStyling: false,
+        customClass: {
+          confirmButton: 'confirmar'
+        }
+      });
       return;
     }
   

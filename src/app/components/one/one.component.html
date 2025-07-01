@@ -80,7 +80,7 @@
           <div class="tab-content tabtwo" id="v-pills-tabContent">
             <div class="tab-pane fade show active" id="v-pills-home2" role="tabpanel" aria-labelledby="v-pills-home2-tab"> 
            
-              <form *ngIf="tipoServicio" (ngSubmit)="$event.preventDefault(); onSubmit()" class="contact-form" #cotizacionForm="ngForm">
+              <form *ngIf="tipoServicio" (ngSubmit)="onSubmit($event)" class="contact-form" #cotizacionForm="ngForm">
               <div class="tab-content tabtwo">
                 <div class="form-group" *ngIf="tipoServicio">
                   <label>Vehículo seleccionado: <strong>{{vehiculoSeleccionado | titlecase}}</strong></label>
@@ -184,9 +184,19 @@
                 </div>
               </div>
 
-              <button class="btn" type="submit" [disabled]="!cotizacionForm.form.valid">
-                <span>Cotizar ahora</span>
-              </button>
+              <div class="button-container" [class.has-tooltip]="hasExistingFormData()">
+                <button 
+                  class="btn" 
+                  type="submit" 
+                  [disabled]="!cotizacionForm.form.valid || isSubmitting || hasExistingFormData()"
+                  (click)="guardarDatos()">
+                  <span *ngIf="!isSubmitting">Cotizar ahora</span>
+                  <span *ngIf="isSubmitting">Procesando...</span>
+                </button>
+                <div class="tooltip" *ngIf="hasExistingFormData()">
+                  Por favor reinicia el formulario para cotizar de nuevo
+                </div>
+              </div>
             </div>
           </form>
           </div>

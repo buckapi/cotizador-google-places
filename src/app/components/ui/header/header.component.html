@@ -9,6 +9,14 @@
           </div>
           <nav></nav>
           <div class="login">
+            <button type="button"
+            (click)="resetApp()"
+            class="boton-reiniciar"
+            title="Reiniciar todo"
+            style="padding: 5px 10px; border-radius: 4px;">
+      <i class="fas fa-redo-alt me-1"></i> Reiniciar
+    </button>
+    
             <a [ngClass]="{'active-route': virtualRouterService.activeroute === 'one'}" 
                class="step-button"
                (click)="virtualRouterService.setActiveRoute('one')">

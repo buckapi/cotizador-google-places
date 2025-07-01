@@ -36,6 +36,8 @@ export class OneComponent implements OnInit, AfterViewInit {
 
   tipoServicio: 'aeropuerto' | 'punto' | 'hora' | null = null;
   vehiculoSeleccionado: string = 'sedan';
+  isSubmitting: boolean = false;
+  formSubmitted: boolean = false;
 
   origin = '';
   destination = '';
@@ -83,23 +85,68 @@ export class OneComponent implements OnInit, AfterViewInit {
       this.destinationCoords = [lng, lat];
     }
   }
+  private saveSubmissionState(): void {
+    const state = {
+      submitted: this.formSubmitted,
+      submitting: this.isSubmitting,
+      timestamp: new Date().getTime()
+    };
+    localStorage.setItem('formSubmissionState', JSON.stringify(state));
+  }
+
+  private clearSubmissionState(): void {
+    localStorage.removeItem('formSubmissionState');
+    this.formSubmitted = false;
+    this.isSubmitting = false;
+  }
+
+  hasExistingFormData(): boolean {
+    const savedState = localStorage.getItem('formSubmissionState');
+    if (!savedState) return false;
+    
+    try {
+      const state = JSON.parse(savedState);
+      // Check if the state is recent (less than 1 hour old)
+      const oneHourAgo = new Date().getTime() - (60 * 60 * 1000);
+      return !!(state.timestamp && state.timestamp > oneHourAgo && state.submitted);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  resetForm(): void {
+    // Clear the form and submission state
+    this.clearSubmissionState();
+    // Reset form fields
+    this.origin = '';
+    this.destination = '';
+    this.passengerCount = 1;
+    this.maletaCount = 0;
+  }
+
   ngOnInit(): void {
     this.tramosService.cargarTramos();
     this.recuperarDatosGuardados();
+    // Verificar si hay un estado de envío guardado
+    const savedState = localStorage.getItem('formSubmissionState');
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        // Verificar si el estado es reciente (menos de 1 hora)
+        const oneHourAgo = new Date().getTime() - (60 * 60 * 1000);
+        if (state.timestamp && state.timestamp > oneHourAgo) {
+          this.formSubmitted = state.submitted;
+          this.isSubmitting = state.submitting;
+        } else {
+          this.clearSubmissionState();
+        }
+      } catch (e) {
+        console.error('Error al cargar el estado del formulario:', e);
+        this.clearSubmissionState();
+      }
+    }
   }
 
-  // ngAfterViewInit(): void {
-  //   const checkElements = () => {
-  //     const originEl = document.querySelector('#originInput');
-  //     const destEl = document.querySelector('#destinationInput');
-  //     if (originEl && destEl) {
-  //       this.initializeAutocomplete();
-  //     } else {
-  //       setTimeout(checkElements, 500);
-  //     }
-  //   };
-  //   checkElements();
-  // }
   ngAfterViewInit(): void {
     const checkElements = () => {
       if (this.originInput?.nativeElement && this.destinationInput?.nativeElement) {
@@ -116,17 +163,17 @@ export class OneComponent implements OnInit, AfterViewInit {
 
   private initializeAutocomplete(): void {
     if (!this.originInput?.nativeElement || !this.destinationInput?.nativeElement) return;
-  
+
     try {
       const originAutocomplete = new google.maps.places.Autocomplete(this.originInput.nativeElement, {
         types: ['establishment'],
         fields: ['formatted_address', 'geometry']
       });
-  
+
       originAutocomplete.addListener('place_changed', () => {
         // ❌ No modificar si tipo aeropuerto y ya hay coordenadas
         if (this.tipoServicio === 'aeropuerto' || this.originCoords) return;
-  
+
         const place = originAutocomplete.getPlace();
         if (place.geometry?.location) {
           const lat = place.geometry.location.lat();
@@ -136,16 +183,16 @@ export class OneComponent implements OnInit, AfterViewInit {
           this.origin = place.formatted_address || 'Origen seleccionado';
         }
       });
-  
+
       const destinationAutocomplete = new google.maps.places.Autocomplete(this.destinationInput.nativeElement, {
         types: ['establishment'],
         fields: ['formatted_address', 'geometry']
       });
-  
+
       destinationAutocomplete.addListener('place_changed', () => {
         // ❌ Evitar sobrescribir si ya hay coordenadas y tipo es aeropuerto
         if (this.tipoServicio === 'aeropuerto' && this.destinationCoords) return;
-  
+
         const place = destinationAutocomplete.getPlace();
         if (place.geometry?.location) {
           const lat = place.geometry.location.lat();
@@ -159,13 +206,12 @@ export class OneComponent implements OnInit, AfterViewInit {
       console.error('Error al inicializar Google Autocomplete:', error);
     }
   }
-  
 
   seleccionarTipoServicio(tipo: 'aeropuerto' | 'punto' | 'hora') {
     this.tipoServicio = tipo;
-    this.destination = '';  
+    this.destination = '';
     this.destinationCoords = undefined;
-    
+
     if (tipo === 'aeropuerto') {
       this.origin = this.nombreAeropuerto;
       this.originCoords = [-99.0721, 19.4361]; // Aeropuerto CDMX (Benito Juárez)
@@ -183,7 +229,6 @@ export class OneComponent implements OnInit, AfterViewInit {
       this.originCoords = undefined;
     }
   }
-  
 
   vehiculoDisponible(tipo: string): boolean {
     return this.vehiculoSeleccionado === tipo;
@@ -237,204 +282,86 @@ export class OneComponent implements OnInit, AfterViewInit {
     }
     this.vehiculoSeleccionado = 'Van 16 asientos';
   }
-  // async onSubmit() {
-  //   try {
-  //     const coordsValidas = await this.geocodeIfCoordsMissing();
-  
-  //     if (!coordsValidas) {
-  //       await Swal.fire('Error', 'Por favor selecciona un origen y destino válidos', 'error');
-  //       return;
-  //     }
-  
-  //     if (this.tipoServicio === 'aeropuerto' && !this.numeroVuelo) {
-  //       await Swal.fire('Error', 'Por favor ingresa el número de vuelo', 'error');
-  //       return;
-  //     }
-  
-  //     Swal.fire({
-  //       title: 'Procesando...',
-  //       text: 'Calculando ruta...',
-  //       allowOutsideClick: false,
-  //       didOpen: () => Swal.showLoading()
-  //     });
-  
-  //     let distanceKm = 0;
-  //     if (this.tipoServicio !== 'hora') {
-  //       distanceKm = await this.mapboxService.getDistanceFromMapbox(
-  //         this.originCoords!,
-  //         this.destinationCoords!
-  //       );
-  //       // Wait for any necessary initialization if needed
-  //       // this.readySubject.next(true); // Uncomment and place this where your component is ready
 
-  //       await this.mapboxService.setMarkersAndDrawRoute(
-  //         this.originCoords!,
-  //         this.destinationCoords!,
-  //         'pk.eyJ1IjoiY29uZWN0YXZldC1jb20iLCJhIjoiY20ybDZpc2dmMDhpMDJpb21iZGI1Y2ZoaCJ9.WquhO_FA_2FM0vhYBaZ_jg',
-  //         (distance, originText, destinationText) => {
-  //           console.log('Ruta dibujada:', distance, originText, destinationText);
-  //         }
-  //       );
-  //     }
-  
-  //     const travelData = {
-  //       tipoServicio: this.tipoServicio,
-  //       vehiculo: this.vehiculoSeleccionado,
-  //       origin: this.origin,
-  //       destination: this.destination,
-  //       originCoords: this.originCoords,
-  //       destinationCoords: this.destinationCoords,
-  //       passengerCount: this.passengerCount,
-  //       maletaCount: this.maletaCount,
-  //       fechaIda: this.fechaIda,
-  //       horaIda: this.horaIda,
-  //       fechaVuelta: this.fechaVuelta,
-  //       horaVuelta: this.horaVuelta,
-  //       numeroVuelo: this.numeroVuelo,
-  //       tipoViaje: this.tipoViaje,
-  //       horasContratadas: this.horasContratadas,
-  //       distanciaKm: distanceKm,
-  //       timestamp: new Date().getTime()
-  //     };
-  
-  //     this.travelData.setTravelData(this.origin, this.destination);
-  //     this.cotizadorService.setDistanciaKm(distanceKm);
-  //     localStorage.setItem('datosCotizador', JSON.stringify(travelData));
-  //     this.guardarDatos();
-  
-  //     this.virtualRouterService.setActiveRoute('two');
-  //     Swal.close();
-  //   } catch (error) {
-  //     console.error('Error en onSubmit:', error);
-  //     await Swal.fire('Error', 'Ocurrió un error al procesar tu solicitud.', 'error');
-  //   }
-  // }
-  
-  // async onSubmit() {
-  //   try {
-  //     if (!this.originCoords) {
-  //       await Swal.fire('Error', 'Por favor selecciona un origen válido', 'error');
-  //       return;
-  //     }
-  //     if (this.tipoServicio !== 'hora' && !this.destinationCoords) {
-  //       await Swal.fire('Error', 'Por favor selecciona un destino válido', 'error');
-  //       return;
-  //     }
-  //     if (this.tipoServicio === 'aeropuerto' && !this.numeroVuelo) {
-  //       await Swal.fire('Error', 'Por favor ingresa el número de vuelo', 'error');
-  //       return;
-  //     }
+  async onSubmit(event: Event) {
+    event.preventDefault();
+    if (this.isSubmitting || this.formSubmitted) return;
 
-  //     Swal.fire({
-  //       title: 'Procesando...',
-  //       text: 'Calculando ruta...',
-  //       allowOutsideClick: false,
-  //       didOpen: () => Swal.showLoading()
-  //     });
+    this.isSubmitting = true;
+    this.saveSubmissionState();
 
-  //     let distanceKm = 0;
-  //     if (this.tipoServicio !== 'hora') {
-  //       distanceKm = await this.mapboxService.getDistanceFromMapbox(
-  //         this.originCoords!,
-  //         this.destinationCoords!
-  //       );
-  //       await this.mapboxService.setMarkersAndDrawRoute(
-  //         this.originCoords!,
-  //         this.destinationCoords!,
-  //         'pk.eyJ1IjoiY29uZWN0YXZldC1jb20iLCJhIjoiY20ybDZpc2dmMDhpMDJpb21iZGI1Y2ZoaCJ9.WquhO_FA_2FM0vhYBaZ_jg',
-  //         (distance, originText, destinationText) => {
-  //           console.log('Ruta dibujada:', distance, originText, destinationText);
-  //         }
-  //       );
-  //     }
+    try {
+      await this.guardarDatos();
 
-  //     const travelData = {
-  //       tipoServicio: this.tipoServicio,
-  //       vehiculo: this.vehiculoSeleccionado,
-  //       origin: this.origin,
-  //       destination: this.destination,
-  //       originCoords: this.originCoords,
-  //       destinationCoords: this.destinationCoords,
-  //       passengerCount: this.passengerCount,
-  //       maletaCount: this.maletaCount,
-  //       fechaIda: this.fechaIda,
-  //       horaIda: this.horaIda,
-  //       fechaVuelta: this.fechaVuelta,
-  //       horaVuelta: this.horaVuelta,
-  //       numeroVuelo: this.numeroVuelo,
-  //       tipoViaje: this.tipoViaje,
-  //       horasContratadas: this.horasContratadas,
-  //       distanciaKm: distanceKm,
-  //       timestamp: new Date().getTime()
-  //     };
+      this.googleMapsService.calcularRuta(async (distanceKm, originText, destinationText) => {
+        try {
+          this.distanciaKm = distanceKm;
+          this.origin = originText;
+          this.destination = destinationText;
 
-  //     this.travelData.setTravelData(this.origin, this.destination);
-  //     this.cotizadorService.setDistanciaKm(distanceKm);
-  //     localStorage.setItem('datosCotizador', JSON.stringify(travelData));
-  //     this.guardarDatos();
+          const travelData = {
+            tipoServicio: this.tipoServicio,
+            vehiculoSeleccionado: this.vehiculoSeleccionado,
+            origin: this.origin,
+            destination: this.destination,
+            passengerCount: this.passengerCount,
+            maletaCount: this.maletaCount,
+            fechaIda: this.fechaIda,
+            horaIda: this.horaIda,
+            fechaVuelta: this.fechaVuelta,
+            horaVuelta: this.horaVuelta,
+            numeroVuelo: this.numeroVuelo,
+            tipoViaje: this.tipoViaje,
+            horasContratadas: this.horasContratadas,
+            distanciaKm: distanceKm,
+            timestamp: new Date().getTime()
+          };
 
-  //     this.virtualRouterService.setActiveRoute('two');
-  //     Swal.close();
-  //   } catch (error) {
-  //     console.error('Error en onSubmit:', error);
-  //     await Swal.fire('Error', 'Ocurrió un error al procesar tu solicitud.', 'error');
-  //   }
-  // }
-  
-  private async geocodeIfCoordsMissing(): Promise<boolean> {
-    const token = 'pk.eyJ1IjoiY29uZWN0YXZldC1jb20iLCJhIjoiY20ybDZpc2dmMDhpMDJpb21iZGI1Y2ZoaCJ9.WquhO_FA_2FM0vhYBaZ_jg';
-  
-    if (this.origin && !this.originCoords) {
-      const result = await this.mapboxService.geocodeAddress(this.origin);
-      if (result.features?.length > 0) {
-        this.originCoords = result.features[0].center;
-      } else {
-        this.originCoords = undefined;
-      }
+          this.travelData.setTravelData(this.origin, this.destination);
+          this.cotizadorService.setDistanciaKm(distanceKm);
+          localStorage.setItem('datosCotizador', JSON.stringify(travelData));
+          this.guardarDatos();
+
+          // Marcar el formulario como enviado
+          this.formSubmitted = true;
+          this.isSubmitting = false;
+          this.saveSubmissionState();
+
+          // Navegar a la siguiente ruta
+          this.virtualRouterService.setActiveRoute('two');
+
+        } catch (error) {
+          console.error('Error al procesar la solicitud:', error);
+          this.isSubmitting = false;
+          await Swal.fire({
+            title: 'Error',
+            text: 'Ocurrió un error al procesar tu solicitud.',
+            icon: 'error',
+            confirmButtonText: 'Entendido',
+            buttonsStyling: false,
+            customClass: {
+              confirmButton: 'confirmar'
+            }
+          });
+        }
+      });
+    } catch (error) {
+      console.error('Error al calcular la ruta:', error);
+      this.isSubmitting = false;
+      await Swal.fire({
+        title: 'Error',
+        text: 'No se pudo calcular la ruta. Por favor, verifica las direcciones e intenta nuevamente.',
+        icon: 'error',
+        confirmButtonText: 'Entendido',
+        buttonsStyling: false,
+        customClass: {
+          confirmButton: 'confirmar'
+        }
+      });
     }
-  
-    if (this.tipoServicio !== 'hora' && this.destination && !this.destinationCoords) {
-      const result = await this.mapboxService.geocodeAddress(this.destination);
-      if (result.features?.length > 0) {
-        this.destinationCoords = result.features[0].center;
-      } else {
-        this.destinationCoords = undefined;
-      }
-    }
-  
-    return !!this.originCoords && (this.tipoServicio === 'hora' || !!this.destinationCoords);
   }
-  async onSubmit() {
-    this.googleMapsService.calcularRuta((distanceKm, originText, destinationText) => {
-      this.distanciaKm = distanceKm;
-      this.origin = originText;
-      this.destination = destinationText;
-  
-      const travelData = {
-        tipoServicio: this.tipoServicio,
-        vehiculoSeleccionado: this.vehiculoSeleccionado,
-        origin: this.origin,
-        destination: this.destination,
-        passengerCount: this.passengerCount,
-        maletaCount: this.maletaCount,
-        fechaIda: this.fechaIda,
-        horaIda: this.horaIda,
-        fechaVuelta: this.fechaVuelta,
-        horaVuelta: this.horaVuelta,
-        numeroVuelo: this.numeroVuelo,
-        tipoViaje: this.tipoViaje,
-        horasContratadas: this.horasContratadas,
-        distanciaKm: distanceKm,
-        timestamp: new Date().getTime()
-      };
-      this.travelData.setTravelData(this.origin, this.destination);
-      this.cotizadorService.setDistanciaKm(distanceKm);
-      localStorage.setItem('datosCotizador', JSON.stringify(travelData));
-      this.guardarDatos();
-      this.virtualRouterService.setActiveRoute('two');
-    });
-  }
-  guardarDatos(): void {
+
+  async guardarDatos(): Promise<void> {
     const formData = {
       tipoServicio: this.tipoServicio,
       vehiculoSeleccionado: this.vehiculoSeleccionado,
@@ -451,6 +378,7 @@ export class OneComponent implements OnInit, AfterViewInit {
       horasContratadas: this.horasContratadas
     };
     localStorage.setItem('cotizacionData', JSON.stringify(formData));
+    this.saveSubmissionState();
   }
 
   recuperarDatosGuardados(): void {

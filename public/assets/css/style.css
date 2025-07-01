@@ -849,6 +849,10 @@ button.btn span {
 .btn:hover:before {
     height: 100%;
     opacity: 1;
+    color: #000 !important;
+}
+.btn:hover::after{
+    color: #000 !important;
 }
 .car-info ul li {
     color: #fff;

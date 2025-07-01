@@ -7,6 +7,7 @@ import { combineLatest, Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-three',
@@ -195,12 +196,110 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
     this.showPriceDetails = !this.showPriceDetails;
   }
 
-  procesarSolicitud(): void {
-    // Aquí puedes agregar la lógica para procesar la solicitud
-    console.log('Procesando solicitud...', this.viajeData);
-    // Ejemplo de redirección o acción:
-    // this.router.navigate(['/confirmacion']);
-    alert('¡Solicitud procesada con éxito!');
+  async procesarSolicitud(): Promise<void> {
+    console.log('Iniciando proceso de pago...', this.viajeData);
+    
+    // Mostrar formulario para recolectar datos del cliente
+    const { value: formValues, isConfirmed } = await Swal.fire({
+      title: 'Información de pago',
+      html: `
+        <div class="text-left">
+          <p class="mb-3">Estás a punto de realizar el pago de $${this.viajeData.tarifaTotal?.toFixed(2) || '0.00'} MXN a través de Stripe.</p>
+          <div class="mb-3">
+            <label for="swal-input1" class="block text-sm font-medium mb-1">Nombre completo</label>
+            <input id="swal-input1" class="swal2-input" placeholder="Nombre completo" required>
+          </div>
+          <div class="mb-3">
+            <label for="swal-input2" class="block text-sm font-medium mb-1">Correo electrónico</label>
+            <input id="swal-input2" class="swal2-input" type="email" placeholder="correo@ejemplo.com" required>
+          </div>
+          <div class="text-xs text-gray-500 mt-4">
+            <p class="font-semibold mb-1">Proceso de pago seguro:</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>Serás redirigido a la plataforma de pago seguro de Stripe</li>
+              <li>Puedes pagar con tarjeta de crédito o débito</li>
+              <li>No almacenamos la información de tu tarjeta</li>
+            </ul>
+          </div>
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Pagar con Stripe',
+      cancelButtonText: 'Cancelar',
+      buttonsStyling: false,
+      customClass: {
+        confirmButton: 'confirmar',
+        cancelButton: 'cancelar',
+        popup: 'text-left'
+      },
+      preConfirm: () => {
+        const nameInput = document.getElementById('swal-input1') as HTMLInputElement;
+        const emailInput = document.getElementById('swal-input2') as HTMLInputElement;
+        
+        if (!nameInput.value || !emailInput.value) {
+          Swal.showValidationMessage('Por favor completa todos los campos');
+          return false;
+        }
+        
+        if (!/^\S+@\S+\.\S+$/.test(emailInput.value)) {
+          Swal.showValidationMessage('Por favor ingresa un correo electrónico válido');
+          return false;
+        }
+        
+        return {
+          name: nameInput.value.trim(),
+          email: emailInput.value.trim()
+        };
+      }
+    });
+
+    // Si el usuario confirma el pago
+    if (isConfirmed && formValues) {
+      try {
+        // Aquí iría la lógica para procesar el pago con Stripe
+        // Por ejemplo:
+        // const paymentResult = await this.stripeService.processPayment({
+        //   amount: this.viajeData.tarifaTotal * 100, // Convertir a centavos
+        //   email: formValues.email,
+        //   name: formValues.name,
+        //   description: `Pago de viaje de ${this.viajeData.origin} a ${this.viajeData.destination}`
+        // });
+
+        // Mostrar confirmación de éxito
+        await Swal.fire({
+          title: '¡Pago exitoso!',
+          html: `
+            <div class="text-center">
+              <i class="fas fa-check-circle text-5xl text-green-500 mb-4"></i>
+              <p class="mb-2">Hemos recibido tu pago correctamente.</p>
+              <p class="text-sm text-gray-600">Hemos enviado los detalles a <strong>${formValues.email}</strong></p>
+            </div>
+          `,
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+          buttonsStyling: false,
+          customClass: {
+            confirmButton: 'confirmar'
+          }
+        });
+
+        // Aquí podrías redirigir al usuario o limpiar el formulario
+        // this.router.navigate(['/gracias']);
+      } catch (error) {
+        console.error('Error procesando el pago:', error);
+        await Swal.fire({
+          title: 'Error',
+          text: 'Ocurrió un error al procesar tu pago. Por favor intenta de nuevo.',
+          icon: 'error',
+          confirmButtonText: 'Entendido',
+          buttonsStyling: false,
+          customClass: {
+            confirmButton: 'confirmar'
+          }
+        });
+      }
+    }
   }
 
   ngOnDestroy(): void {

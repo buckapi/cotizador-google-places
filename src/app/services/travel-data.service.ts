@@ -14,4 +14,10 @@ export class TravelDataService {
     this.originSubject.next(origin);
     this.destinationSubject.next(destination);
   }
+
+  resetAllData(): void {
+    // Reset the BehaviorSubjects to their default values
+    this.originSubject.next('taganga');
+    this.destinationSubject.next('santa marta magdalena calle 18 7a');
+  }
 }
