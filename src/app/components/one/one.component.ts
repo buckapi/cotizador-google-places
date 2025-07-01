@@ -191,40 +191,49 @@ export class OneComponent implements OnInit, AfterViewInit {
       }
     }
   }
+  async ngAfterViewInit(): Promise<void> {
+    try {
+      // Espera a que Google Maps esté disponible
+      await this.googleMapsService.loadGoogleMaps();
 
-  ngAfterViewInit(): void {
-    const checkElements = () => {
-      if (this.originInput?.nativeElement && this.destinationInput?.nativeElement) {
-        this.googleMapsService.setupAutocomplete(
-          this.originInput.nativeElement,
-          this.tipoServicio !== 'hora' ? this.destinationInput.nativeElement : undefined
-        );
-  
-        if (this.tipoServicio === 'hora') {
-          const autocomplete = new google.maps.places.Autocomplete(this.originInput.nativeElement, {
-            types: ['geocode'],
-            fields: ['geometry', 'formatted_address']
-          });
-  
-          autocomplete.addListener('place_changed', () => {
-            const place = autocomplete.getPlace();
-            if (place.geometry?.location) {
-              const lat = place.geometry.location.lat();
-              const lng = place.geometry.location.lng();
-              this.originCoords = [lng, lat];
-              this.origin = place.formatted_address || 'Ubicación seleccionada';
-  
-              this.googleMapsService.addPickupMarker({ lat, lng });
-              this.googleMapsService.centerMap({ lat, lng });
-            }
-          });
+      const checkElements = () => {
+        if (this.originInput?.nativeElement && this.destinationInput?.nativeElement) {
+          // Configura Autocomplete según tipo de servicio
+          if (this.tipoServicio !== 'hora') {
+            this.googleMapsService.setupAutocomplete(
+              this.originInput.nativeElement,
+              this.destinationInput.nativeElement
+            );
+          } else {
+            const autocomplete = new google.maps.places.Autocomplete(this.originInput.nativeElement, {
+              types: ['geocode'],
+              fields: ['geometry', 'formatted_address']
+            });
+
+            autocomplete.addListener('place_changed', () => {
+              const place = autocomplete.getPlace();
+              if (place.geometry?.location) {
+                const lat = place.geometry.location.lat();
+                const lng = place.geometry.location.lng();
+                this.originCoords = [lng, lat];
+                this.origin = place.formatted_address || 'Ubicación seleccionada';
+                this.googleMapsService.addPickupMarker({ lat, lng });
+                this.googleMapsService.centerMap({ lat, lng });
+              }
+            });
+          }
+        } else {
+          // Si los elementos aún no están disponibles, reintenta
+          setTimeout(checkElements, 300);
         }
-      } else {
-        setTimeout(checkElements, 300);
-      }
-    };
-    checkElements();
+      };
+
+      checkElements();
+    } catch (error) {
+      console.error('Error cargando Google Maps:', error);
+    }
   }
+
   
   
   onPickupBlur(event: FocusEvent): void {
