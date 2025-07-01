@@ -144,6 +144,42 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
     this.router.navigate(['/one']);
   }
 
+  // Obtener la tarifa por hora según el vehículo seleccionado
+  getTarifaHora() {
+    const tarifasHora = [
+      { tipo: 'sedan', subtipo: 'estandar', pasajeros: 3, base: 1500, adicional: 750, tiempoMax: '24 h' },
+      { tipo: 'sedan', subtipo: 'espacioso', pasajeros: 3, base: 2056, adicional: 1028, tiempoMax: '24 h' },
+      { tipo: 'sedan', subtipo: 'premium', pasajeros: 3, base: 3480, adicional: 1740, tiempoMax: '24 h' },
+      { tipo: 'minivan', subtipo: 'estandar', pasajeros: 6, base: 2898, adicional: 1449, tiempoMax: '24 h' },
+      { tipo: 'minivan', subtipo: 'premium', pasajeros: 6, base: 5761, adicional: 2880, tiempoMax: '24 h' },
+      { tipo: 'suv', subtipo: 'premium', pasajeros: 7, base: 6356, adicional: 3178, tiempoMax: '24 h' },
+      { tipo: 'minibus', subtipo: 'Van 12 asientos', pasajeros: 12, base: 7950, adicional: 3975, tiempoMax: '24 h' },
+      { tipo: 'Van 16 asientos', subtipo: 'Van 16 asientos', pasajeros: 16, base: 8960, adicional: 4480, tiempoMax: '24 h' }
+    ];
+
+    return tarifasHora.find(t => 
+      t.tipo === this.viajeData.vehiculoSeleccionado && 
+      t.subtipo === this.viajeData.vehiculoSubtipoSeleccionado
+    );
+  }
+
+  // Método para calcular el total del servicio por hora
+  calcularTotalHora(): number {
+    if (!this.viajeData.hours) return 0;
+    
+    const horas = parseFloat(this.viajeData.hours);
+    const tarifa = this.getTarifaHora();
+    
+    if (!tarifa) return 0;
+
+    // Calcular tarifa según las horas
+    const horasExtras = Math.max(0, horas - 2); // Las primeras 2 horas ya están incluidas
+    const subtotal = tarifa.base + (horasExtras * tarifa.adicional);
+    
+    // Aplicar IVA del 16%
+    return subtotal * 1.16;
+  }
+
   // Método para guardar los datos actualizados
   private guardarDatos(): void {
     localStorage.setItem('datosCotizador', JSON.stringify(this.viajeData));

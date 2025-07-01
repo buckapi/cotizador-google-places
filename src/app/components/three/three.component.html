@@ -9,41 +9,52 @@
         
         <!-- Parte superior: título y anotaciones -->
         <div>
-          <div class="heading two ">
+          <div class="heading two">
             <span class="text-uppercase text-muted small">Detalles de su viaje</span>
-            <h2 class="">Resumen del <span class="text-warning">traslado</span></h2>
+            <h2>Resumen del <span class="text-warning">traslado</span></h2>
           </div>
 
           <!-- Información del viaje -->
-        
+          <ng-container *ngIf="viajeData.tipoServicio !== 'hora'; else horaTemplate">
+            <div class="location-info mb-3">
+              <div class="d-flex align-items-center mb-2">
+                <img src="assets/img/blue.png" alt="Origen" style="height: 24px; margin-right: 10px;">
+                <span class="fw-bold text-uppercase">Origen</span>
+              </div>
+              <div class="text-light small">
+                {{ origenTexto }}
+              </div>
+            </div>
 
-        
-
-          <div class="location-info mb-3">
-            <div class="d-flex align-items-center mb-2">
-              <img src="assets/img/blue.png" alt="Origen" style="height: 24px; margin-right: 10px;">
-              <span class="fw-bold text-uppercase">Origen</span>
+            <div class="location-info mb-3">
+              <div class="d-flex align-items-center mb-2">
+                <img src="assets/img/red.png" alt="Destino" style="height: 24px; margin-right: 10px;">
+                <span class="fw-bold text-uppercase">Destino</span>
+              </div>
+              <div class="text-light small">
+                {{ destinoTexto }}
+              </div>
             </div>
-            <div class="text-light small">
-              {{ origenTexto }}
+          </ng-container>
+          
+          <ng-template #horaTemplate>
+            <!-- Información específica para servicio por hora -->
+            <div class="location-info mb-3">
+              <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-map-marker-alt me-2" style="color: #3498db; font-size: 1.2rem;"></i>
+                <span class="fw-bold text-uppercase">Ubicación de recogida</span>
+              </div>
+              <div class="text-light small">
+                {{ origenTexto }}
+              </div>
             </div>
-          </div>
-
-          <div class="location-info mb-3">
-            <div class="d-flex align-items-center mb-2">
-              <img src="assets/img/red.png" alt="Destino" style="height: 24px; margin-right: 10px;">
-              <span class="fw-bold text-uppercase">Destino</span>
-            </div>
-            <div class="text-light small">
-              {{ destinoTexto }}
-            </div>
-          </div>
+          </ng-template>
         </div>
 
         <!-- Info Cards: Distancia, Vehículo y Pasajeros -->
         <div class="d-flex flex-column flex-md-row flex-wrap g-3 mb-3">
-          <!-- Distancia -->
-          <div class="col-12 col-md-4 px-0 px-md-2">
+          <!-- Distancia - Solo mostrar si no es servicio por hora -->
+          <div class="col-12 col-md-4 px-0 px-md-2" *ngIf="viajeData.tipoServicio !== 'hora'">
             <div class="info-card d-flex align-items-center h-100 p-3">
               <div class="icon-container me-3">
                 <img src="assets/img/distance.png" alt="Distancia" class="info-icon">
@@ -56,7 +67,7 @@
           </div>
 
           <!-- Vehículo -->
-          <div class="col-12 col-md-4 px-0 px-md-2">
+          <div class="col-12 col-md-4 px-0 px-md-2" *ngIf="viajeData.tipoServicio !== 'hora'">
             <div class="info-card d-flex align-items-center h-100 p-3">
               <div class="icon-container me-3">
                 <img [src]="getImagenVehiculo(viajeData.vehiculoSeleccionado, viajeData.vehiculoSubtipoSeleccionado)" 
@@ -76,7 +87,7 @@
           </div>
 
           <!-- Pasajeros -->
-          <div class="col-12 col-md-4 px-0 px-md-2">
+          <div class="col-12 col-md-4 px-0 px-md-2" *ngIf="viajeData.tipoServicio !== 'hora'">
             <div class="info-card d-flex align-items-center h-100 p-3">
               <div class="icon-container me-3">
                 <i class="fas fa-users info-icon" style="font-size: 1.75rem;"></i>
@@ -84,6 +95,39 @@
               <div class="info-content">
                 <h6 class="info-label">Pasajeros</h6>
                 <h4 class="info-value">{{ viajeData.passengerCount || '0' }}</h4>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-5 px-0 px-md-2" *ngIf="viajeData.tipoServicio === 'hora'">
+            <div class="info-card d-flex align-items-center h-100 p-3">
+              <div class="icon-container me-3">
+                <i class="fas fa-users info-icon" style="font-size: 1.75rem;"></i>
+              </div>
+              <div class="info-content">
+                <h6 class="info-label">Pasajeros</h6>
+                <h4 class="info-value">{{ viajeData.passengerCount || '0' }}</h4>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- vehiculo aqui -->
+          
+          <div class="col-12 col-md-7 px-0 px-md-2" *ngIf="viajeData.tipoServicio === 'hora'">
+            <div class="info-card d-flex align-items-center h-100 p-3">
+              <div class="icon-container-vehiculo me-3">
+                <img [src]="getImagenVehiculo(viajeData.vehiculoSeleccionado, viajeData.vehiculoSubtipoSeleccionado)" 
+                     [alt]="(viajeData.vehiculoSeleccionado || 'Vehículo')" 
+                     class="info-icon-ve">
+              </div>
+              <div class="info-content">
+                <h6 class="info-label">Vehículo</h6>
+                <h4 class="info-value text-truncate" style="max-width: 150px;">
+                  {{ viajeData.vehiculoSeleccionado || 'No seleccionado' }}
+                  <span *ngIf="viajeData.vehiculoSubtipoSeleccionado" class="d-block small text-muted">
+                    {{ viajeData.vehiculoSubtipoSeleccionado }}
+                  </span>
+                </h4>
               </div>
             </div>
           </div>
@@ -96,49 +140,78 @@
         <div class="tarifa-detalle mb-3 p-3" style="background-color: #1a1a1a; border-radius: 12px;">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="text-warning m-0">Desglose de la tarifa</h6>
-          
           </div>
           
           <div *ngIf="showPriceDetails">
-            <!-- Precio base (0-10km) -->
-            <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted">Precio base (0-10 km):</span>
-              <span class="text-white">{{ desgloseTarifa.precioBase | number:'1.2-2' }} $</span>
-            </div>
-            
-            <!-- KM extras si aplica -->
-            <div *ngIf="desgloseTarifa.kmExtras > 0" class="d-flex justify-content-between mb-2">
-              <div>
-                <div class="text-muted">KM adicionales:</div>
-                <div class="small text-muted">{{ desgloseTarifa.kmExtras | number:'1.2-2' }} km x {{ desgloseTarifa.precioPorKm | number:'1.2-2' }} $/km</div>
+            <ng-container *ngIf="viajeData.tipoServicio === 'hora'; else puntoOAeropuerto">
+              <!-- Detalles para servicio por hora -->
+              <div class="d-flex flex-column gap-2">
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">Pasajeros:</span>
+                  <span class="text-white">{{ viajeData.passengerCount || '0' }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">Base ({{ viajeData.hours || '0' }}h / {{ viajeData.distanciaKm || '0' }} km):</span>
+                  <span class="text-white">{{ desgloseTarifa.precioBase | number:'1.0-0' | currency:'$':'symbol':'1.0-0' }}</span>
+                </div>
+                <div class="d-flex justify-content-between" *ngIf="viajeData.hours > 2">
+                  <span class="text-muted">Adicional por hora ({{ viajeData.kmAdicionalesPorHora || '0' }} km):</span>
+                  <span class="text-white">{{ (desgloseTarifa.precioBase * 0.5) | number:'1.0-0' | currency:'$':'symbol':'1.0-0' }}</span>
+                </div>
+                <div class="d-flex justify-content-between pt-2 border-top border-secondary">
+                  <span class="text-muted">Máximo:</span>
+                  <span class="text-white">24 h</span>
+                </div>
               </div>
-              <span class="text-white">{{ (desgloseTarifa.kmExtras * desgloseTarifa.precioPorKm) | number:'1.2-2' }} $</span>
-            </div>
+            </ng-container>
+            
+            <ng-template #puntoOAeropuerto>
+              <!-- Detalles para servicio punto a punto o aeropuerto -->
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Precio base (0-10 km):</span>
+                <span class="text-white">{{ desgloseTarifa.precioBase | number:'1.2-2' | currency:'$':'symbol':'1.2-2' }}</span>
+              </div>
+              
+              <!-- KM extras si aplica -->
+              <div *ngIf="desgloseTarifa.kmExtras > 0" class="d-flex justify-content-between mb-2">
+                <div>
+                  <div class="text-muted">KM adicionales:</div>
+                  <div class="small text-muted">{{ desgloseTarifa.kmExtras | number:'1.2-2' }} km x {{ desgloseTarifa.precioPorKm | number:'1.2-2' | currency:'$':'symbol':'1.2-2' }}/km</div>
+                </div>
+                <span class="text-white">{{ (desgloseTarifa.kmExtras * desgloseTarifa.precioPorKm) | number:'1.2-2' | currency:'$':'symbol':'1.2-2' }}</span>
+              </div>
+            </ng-template>
           </div>
           
           <!-- Subtotal -->
-          <div class="d-flex justify-content-between mb-2 pt-2 border-top border-secondary">
+          <div  class="d-flex justify-content-between mb-2 pt-2 border-top border-secondary">
             <div class="d-flex align-items-center">
               <span class="text-muted me-2">Subtotal:</span>
-              <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" 
+              <button *ngIf="viajeData.tipoServicio !== 'hora'" class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" 
                       (click)="$event.stopPropagation(); togglePriceDetails()" 
                       style="width: 20px; height: 20px; background-color: #d6c500; font-size: 32px   !important; font-weight: bold; border: 1px solid #d6c500; padding: 0;">
                 <i class="fas fa-info" style="color: black; font-size: 10px; line-height: 1;"></i>
               </button>
             </div>
-            <span class="text-white">{{ desgloseTarifa.subtotal | number:'1.2-2' }} $</span>
+            <span *ngIf="viajeData.tipoServicio !== 'hora'" class="text-white">{{ desgloseTarifa.subtotal | number:'1.2-2' }} $</span>
+            <span *ngIf="viajeData.tipoServicio === 'hora'" class="text-white">{{ viajeData.tarifaTotal | number:'1.2-2' }} $</span>
           </div>
           
           <!-- IVA -->
-          <div class="d-flex justify-content-between mb-2">
+          <div *ngIf="viajeData.tipoServicio !== 'hora'" class="d-flex justify-content-between mb-2">
             <span class="text-muted">IVA (16%):</span>
-            <span class="text-white">{{ desgloseTarifa.iva | number:'1.2-2' }} $</span>
+            <span  class="text-white">{{     desgloseTarifa.iva  | number:'1.2-2' }} $</span>
+          </div>
+          <div *ngIf="viajeData.tipoServicio === 'hora'" class="d-flex justify-content-between mb-2">
+            <span class="text-muted">IVA (16%):</span>
+            <span  class="text-white">{{ viajeData.tarifaTotal * 0.16 | number:'1.2-2' }} $</span>
           </div>
           
           <!-- Total -->
           <div class="d-flex justify-content-between mb-0 pt-2 border-top border-secondary">
             <span class="fw-bold">Total:</span>
-            <span class="text-warning">{{ desgloseTarifa.total | number:'1.2-2' }} $</span>
+            <span *ngIf="viajeData.tipoServicio !== 'hora'" class="text-warning">{{ desgloseTarifa.total | number:'1.2-2' }} $</span>
+            <span *ngIf="viajeData.tipoServicio === 'hora'" class="text-warning">{{ viajeData.tarifaTotal + viajeData.tarifaTotal * 0.16 | number:'1.2-2' }} $</span>
           </div>
           <textarea 
           class="form-control mb-4 mt-2" 
@@ -166,7 +239,7 @@
       <!-- Fin del panel izquierdo -->
 
       <!-- Mapa (Panel derecho) -->
-      <div class="col-12 col-lg-7 p-0 position-relative">
+      <div class="col-12 col-lg-7 p-0 position-relative" *ngIf="viajeData.tipoServicio !== 'hora'">
         <div class="map-container">
           <div #mapRef id="map"></div>
           <!-- Style Toggle Button -->

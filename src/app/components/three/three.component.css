@@ -194,4 +194,18 @@ html, body {
   color: #000000;
   background-color: #f8f9fa;
   border-color: #d6d6d6;
+}.btn-warning
+
+
+.icon-container-vehiculo {
+  height:   140px;
+  width: 140px;
+  object-fit: contain;
+}
+.info-icon-ve {
+  height: 200px;
+  background-color: #fff;
+  border-radius: 12px;
+  width: 200px;
+  object-fit: contain;
 }
