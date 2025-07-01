@@ -4,11 +4,12 @@ import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { TravelDataService } from '../../../services/travel-data.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { VirtualRouterService } from '../../../services/virtual-router.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
@@ -17,7 +18,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private routerSubscription: Subscription | undefined;
   constructor(
     private travelDataService: TravelDataService,
-    public router: Router
+    public router: Router,
+    public virtualRouterService:VirtualRouterService
   ) { }
 
   ngOnInit() {
@@ -66,9 +68,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   
     if (result.isConfirmed) {
       this.travelDataService.resetAllData();
-      this.router.navigate(['/one']);
+      // this.router.navigate(['/one']);
+      this.virtualRouterService.setActiveRoute('one');
       localStorage.clear();
-      this.router.navigate(['/one']);
+      // this.router.navigate(['/one']);
+      this.virtualRouterService.setActiveRoute('one');
+
   
       await Swal.fire({
         title: '¡Reiniciado!',

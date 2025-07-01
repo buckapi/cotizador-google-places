@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
+import { VirtualRouterService } from '../../services/virtual-router.service';
 
 @Component({
   selector: 'app-three',
@@ -31,6 +32,7 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
   stylesEnabled = true;
 
   constructor(
+    public virtualRouterService: VirtualRouterService,
     private googleMapsService: GoogleMapsService,
     private travelDataService: TravelDataService,
     private cotizadorService: CotizadorService,
@@ -136,12 +138,14 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
   }
 
   volver() {
-    this.router.navigate(['/two']);
+    this.virtualRouterService.setActiveRoute('two');
+    // this.router.navigate(['/two']);
   }
 
   finalizar() {
     // Lógica para finalizar la cotización
-    this.router.navigate(['/one']);
+    this.virtualRouterService.setActiveRoute('one');
+    // this.router.navigate(['/one']);
   }
 
   // Obtener la tarifa por hora según el vehículo seleccionado

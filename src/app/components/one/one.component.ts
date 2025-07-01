@@ -16,6 +16,7 @@ import { TramosService } from '../../services/tramos.service';
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { GoogleMapsService } from '../../services/google-maps.service';
+import { VirtualRouterService } from '../../services/virtual-router.service';
 
 @Component({
   selector: 'app-one',
@@ -61,6 +62,7 @@ export class OneComponent implements OnInit, AfterViewInit {
   readonly nombreAeropuerto = 'Aeropuerto de Culiacán';
 
   constructor(
+    public virtualRouterService: VirtualRouterService ,
     private googleMapsService: GoogleMapsService,
     private travelData: TravelDataService,
     private mapboxService: MapboxService,
@@ -400,7 +402,8 @@ export class OneComponent implements OnInit, AfterViewInit {
         this.saveSubmissionState();
 
         // Navegar a la siguiente ruta
-        this.router.navigate(['/two']);
+        this.virtualRouterService.setActiveRoute('two');
+        // this.router.navigate(['/two']);
       } else {
         // Para aeropuerto y punto a punto, calcular ruta
         this.googleMapsService.calcularRuta(async (distanceKm, originText, destinationText) => {
@@ -439,7 +442,8 @@ export class OneComponent implements OnInit, AfterViewInit {
             this.saveSubmissionState();
 
             // Navegar a la siguiente ruta
-            this.router.navigate(['/two']);
+            this.virtualRouterService.setActiveRoute('two');
+            // this.router.navigate(['/two']);
 
           } catch (error) {
             console.error('Error al procesar la solicitud:', error);

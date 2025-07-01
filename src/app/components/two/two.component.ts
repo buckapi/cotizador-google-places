@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CotizadorService } from '../../services/cotizador.service';
 import { TramosService } from '../../services/tramos.service';
 import { Router } from '@angular/router';
+import { VirtualRouterService } from '../../services/virtual-router.service';
 
 @Component({
   selector: 'app-two',
@@ -21,6 +22,7 @@ export class TwoComponent implements OnInit {
   tarifaTotal = 0;
   duracionHoras = 2;
   constructor(
+    public virtualRouterService: VirtualRouterService,
     public cotizadorService: CotizadorService,
     private tramosService: TramosService,
     private router: Router
@@ -250,7 +252,8 @@ export class TwoComponent implements OnInit {
 
   seleccionarAhora() {
     this.guardarSeleccion();
-    this.router.navigate(['/three']);
+    this.virtualRouterService.setActiveRoute('three');
+    // this.router.navigate(['/three']);
   }
   
 

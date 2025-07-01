@@ -1,2 +1,5 @@
 <app-header></app-header>
-<router-outlet></router-outlet>
+<!-- <router-outlet></router-outlet> -->
+<app-one *ngIf="virtualRouterService.activeRoute === 'one'"></app-one>
+<app-two *ngIf="virtualRouterService.activeRoute === 'two'"></app-two>
+<app-three *ngIf="virtualRouterService.activeRoute === 'three'"></app-three>
