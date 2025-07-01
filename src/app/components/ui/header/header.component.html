@@ -9,25 +9,28 @@
           </div>
           <nav></nav>
           <div class="login">
-            <button type="button"
-            (click)="resetApp()"
-            class="boton-reiniciar"
-            title="Reiniciar todo"
-            style="padding: 5px 10px; border-radius: 4px;">
-      <i class="fas fa-redo-alt me-1"></i> Reiniciar
-    </button>
+            <button *ngIf="hasSubmittedForm()"
+                    type="button"
+                    (click)="resetApp()"
+                    class="boton-reiniciar"
+                    title="Reiniciar todo"
+                    style="padding: 5px 10px; border-radius: 4px; margin-right: 10px;">
+              <i class="fas fa-redo-alt me-1"></i> Reiniciar
+            </button>
     
             <a [ngClass]="{'active-route': virtualRouterService.activeroute === 'one'}" 
                class="step-button"
                (click)="virtualRouterService.setActiveRoute('one')">
               <span>1</span>
             </a>
-            <a [ngClass]="{'active-route': virtualRouterService.activeroute === 'two'}" 
+            <a *ngIf="hasSubmittedForm()"
+               [ngClass]="{'active-route': virtualRouterService.activeroute === 'two'}" 
                class="step-button"
                (click)="virtualRouterService.setActiveRoute('two')">
               <span>2</span>
             </a>
-            <a [ngClass]="{'active-route': virtualRouterService.activeroute === 'three'}" 
+            <a *ngIf="hasSubmittedForm()"
+               [ngClass]="{'active-route': virtualRouterService.activeroute === 'three'}" 
                class="step-button"
                (click)="virtualRouterService.setActiveRoute('three')">
               <span>3</span>

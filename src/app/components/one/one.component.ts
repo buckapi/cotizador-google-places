@@ -33,6 +33,7 @@ export class OneComponent implements OnInit, AfterViewInit {
   private destinationPlace: google.maps.places.PlaceResult | null = null;
   private readySubject = new BehaviorSubject<boolean>(false);
   public ready$: Observable<boolean> = this.readySubject.asObservable();
+  sillasBebe: number = 0;
 
   tipoServicio: 'aeropuerto' | 'punto' | 'hora' | null = null;
   vehiculoSeleccionado: string = 'sedan';
@@ -69,6 +70,18 @@ export class OneComponent implements OnInit, AfterViewInit {
     public cotizadorService: CotizadorService,
     public tramosService: TramosService
   ) {}
+  increaseSillasBebe(): void {
+    if (this.sillasBebe < 5) { // puedes ajustar el límite máximo
+      this.sillasBebe++;
+    }
+  }
+  
+  decreaseSillasBebe(): void {
+    if (this.sillasBebe > 0) {
+      this.sillasBebe--;
+    }
+  }
+  
   handleOriginChange(place: google.maps.places.PlaceResult) {
     const location = place.geometry?.location;
     if (location) {
@@ -307,6 +320,7 @@ export class OneComponent implements OnInit, AfterViewInit {
             passengerCount: this.passengerCount,
             maletaCount: this.maletaCount,
             fechaIda: this.fechaIda,
+            sillasBebe: this.sillasBebe,
             horaIda: this.horaIda,
             fechaVuelta: this.fechaVuelta,
             horaVuelta: this.horaVuelta,
@@ -369,6 +383,7 @@ export class OneComponent implements OnInit, AfterViewInit {
       destination: this.destination,
       passengerCount: this.passengerCount,
       maletaCount: this.maletaCount,
+      sillasBebe: this.sillasBebe, // ← aquí
       fechaIda: this.fechaIda,
       horaIda: this.horaIda,
       fechaVuelta: this.fechaVuelta,
@@ -377,6 +392,7 @@ export class OneComponent implements OnInit, AfterViewInit {
       tipoViaje: this.tipoViaje,
       horasContratadas: this.horasContratadas
     };
+    
     localStorage.setItem('cotizacionData', JSON.stringify(formData));
     this.saveSubmissionState();
   }

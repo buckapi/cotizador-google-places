@@ -118,7 +118,7 @@
               </div>
 
               <div class="row">
-                <div class="col-lg-6">
+                <div class="col-lg-4">
                   <div class="quantity-wrapper">
                     <label class="quantity-label">Cantidad de pasajeros</label>
                     <div class="quantity-control">
@@ -128,7 +128,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-4">
                   <div class="quantity-wrapper">
                     <label class="quantity-label">Cantidad de maletas</label>
                     <div class="quantity-control">
@@ -139,6 +139,17 @@
                     </div>
                   </div>
                 </div>
+                <div class="col-lg-4">
+                  <div class="quantity-wrapper">
+                    <label class="quantity-label">Sillas para bebé (opcional)</label>
+                    <div class="quantity-control">
+                      <button type="button" class="qty-btn" (click)="decreaseSillasBebe()">−</button>
+                      <span class="qty-value">{{ sillasBebe }}</span>
+                      <button type="button" class="qty-btn" (click)="increaseSillasBebe()">+</button>
+                    </div>
+                  </div>
+                </div>
+                
                 
               </div>
              

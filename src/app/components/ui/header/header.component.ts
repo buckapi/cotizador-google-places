@@ -17,6 +17,19 @@ export class HeaderComponent {
     private travelDataService: TravelDataService
   ) { }
 
+  hasSubmittedForm(): boolean {
+    const savedState = localStorage.getItem('formSubmissionState');
+    if (!savedState) return false;
+    
+    try {
+      const state = JSON.parse(savedState);
+      const oneHourAgo = new Date().getTime() - (60 * 60 * 1000);
+      return !!(state.timestamp && state.timestamp > oneHourAgo && state.submitted);
+    } catch (e) {
+      return false;
+    }
+  }
+
   async resetApp(): Promise<void> {
     const result = await Swal.fire({
       title: '¿Estás seguro?',
