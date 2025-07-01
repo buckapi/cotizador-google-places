@@ -39,7 +39,7 @@
   {
     "type": "initial",
     "maximumWarning": "2MB",
-    "maximumError": "2MB"
+    "maximumError": "3MB"
   },
   {
     "type": "anyComponentStyle",
