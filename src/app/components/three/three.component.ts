@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
-declare const google: any;
+
 @Component({
   selector: 'app-three',
   standalone: true,
@@ -184,11 +184,11 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
   private guardarDatos(): void {
     localStorage.setItem('datosCotizador', JSON.stringify(this.viajeData));
   }
-  async ngAfterViewInit(): Promise<void> {
-    // Esperar a que el script de Google Maps esté completamente cargado
-    await this.googleMapsService.loadGoogleMaps();
-  
-    setTimeout(async () => {
+
+  ngAfterViewInit(): void {
+    // Usar setTimeout para evitar el error de cambio de expresión
+    setTimeout(() => {
+      // Cargar datos del localStorage
       const datosGuardados = localStorage.getItem('datosCotizador');
       if (datosGuardados) {
         try {
@@ -197,15 +197,20 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
           this.destinoTexto = this.viajeData.destination || '';
           this.distanciaKm = parseFloat(this.viajeData.distanciaKm) || 0;
           this.tarifaTotal = parseFloat(this.viajeData.tarifaTotal) || 0;
-  
-          await this.googleMapsService.initMap(this.mapRef.nativeElement);
-  
+          
+          // Inicializar el mapa
+          this.googleMapsService.initMap(this.mapRef.nativeElement);
+          
+          // Si es servicio por hora, mostrar marcador en el punto de recogida
           if (this.viajeData.tipoServicio === 'hora' && this.viajeData.originCoords) {
             const [lng, lat] = this.viajeData.originCoords;
             this.googleMapsService.addPickupMarker({ lat, lng }, 'Punto de recogida');
             this.googleMapsService.centerMap({ lat, lng });
-          } else if (this.viajeData.originCoords && this.viajeData.destinationCoords) {
-            await this.googleMapsService.calcularRuta(
+          } 
+          // Si hay coordenadas de origen y destino, dibujar la ruta
+          else if (this.viajeData.originCoords && this.viajeData.destinationCoords) {
+            // Llamar a calcularRuta con las coordenadas guardadas
+            this.googleMapsService.calcularRuta(
               (distancia: number, origen: string, destino: string) => {
                 this.distanciaKm = distancia;
                 this.origenTexto = origen || this.origenTexto;
@@ -218,24 +223,49 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
               this.viajeData.destination
             );
           }
-  
-          await this.tramosService.cargarTramos();
-          this.calcularDesgloseTarifa();
-          this.cdr.detectChanges();
-  
+          
+          // Asegurarse de que el servicio de tramos esté cargado
+          this.tramosService.cargarTramos().then(() => {
+            // Calcular el desglose de la tarifa después de cargar los tramos
+            this.calcularDesgloseTarifa();
+            this.cdr.detectChanges();
+          });
+          
         } catch (error) {
           console.error('Error al cargar los datos guardados:', error);
         }
       }
     });
-  
-    this.subs.add(
-      this.cotizadorService.tarifaTotal$.subscribe(valor => {
-        this.tarifaTotal = valor;
-      })
-    );
+
+    // Inicializar el mapa
+    this.googleMapsService.initMap(this.mapRef.nativeElement);
+
+    // Si es servicio por hora, mostrar marcador en el punto de recogida
+    if (this.viajeData.tipoServicio === 'hora' && this.viajeData.originCoords) {
+      const [lng, lat] = this.viajeData.originCoords;
+      this.googleMapsService.addPickupMarker({ lat, lng }, 'Punto de recogida');
+      this.googleMapsService.centerMap({ lat, lng });
+      this.origenTexto = this.viajeData.origin || 'Ubicación seleccionada';
+      this.destinoTexto = 'Servicio por hora';
+      this.cdr.detectChanges();
+    } 
+    // Si hay coordenadas de origen y destino, dibujar la ruta
+    else if (this.viajeData.originCoords && this.viajeData.destinationCoords) {
+      this.googleMapsService.calcularRuta(
+        (distancia: number, origen: string, destino: string) => {
+          this.distanciaKm = distancia;
+          this.origenTexto = origen || this.origenTexto;
+          this.destinoTexto = destino || this.destinoTexto;
+          this.cdr.detectChanges();
+        }
+      );
+    }
+
+    // Suscribirse a cambios en la tarifa
+    this.cotizadorService.tarifaTotal$.subscribe(valor => {
+      this.tarifaTotal = valor;
+    });
   }
-  
 
   // Obtener la ruta de la imagen del vehículo seleccionado
   getImagenVehiculo(tipo: string, subtipo: string): string {
