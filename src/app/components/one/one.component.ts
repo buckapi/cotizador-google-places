@@ -7,14 +7,12 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { TravelDataService } from '../../services/travel-data.service';
 import { MapboxService } from '../../services/mapbox.service';
-import { VirtualRouterService } from '../../services/virtual-router.service';
 import { CotizadorService } from '../../services/cotizador.service';
 import { TramosService } from '../../services/tramos.service';
-import { firstValueFrom } from 'rxjs';
-import { filter } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { GoogleMapsService } from '../../services/google-maps.service';
@@ -66,7 +64,7 @@ export class OneComponent implements OnInit, AfterViewInit {
     private googleMapsService: GoogleMapsService,
     private travelData: TravelDataService,
     private mapboxService: MapboxService,
-    public virtualRouterService: VirtualRouterService,
+    private router: Router,
     public cotizadorService: CotizadorService,
     public tramosService: TramosService
   ) {}
@@ -81,13 +79,40 @@ export class OneComponent implements OnInit, AfterViewInit {
       this.sillasBebe--;
     }
   }
+  private initPickupAutocomplete(): void {
+    if (this.tipoServicio === 'hora' && this.originInput?.nativeElement) {
+      const autocomplete = new google.maps.places.Autocomplete(this.originInput.nativeElement, {
+        types: ['geocode'],
+        fields: ['geometry', 'formatted_address']
+      });
+  
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place.geometry?.location) {
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+          this.originCoords = [lng, lat];
+          this.origin = place.formatted_address || 'Ubicación seleccionada';
+          this.googleMapsService.addPickupMarker({ lat, lng });
+          this.googleMapsService.centerMap({ lat, lng });
+        }
+      });
+    }
+  }
   
   handleOriginChange(place: google.maps.places.PlaceResult) {
     const location = place.geometry?.location;
     if (location) {
       const lat = location.lat();
       const lng = location.lng();
-      this.originCoords = [lng, lat]; // ¡Ojo! Mapbox usa [lng, lat]
+      this.originCoords = [lng, lat];
+      
+      // Si es un servicio por hora, actualizar el mapa con el marcador de recogida
+      if (this.tipoServicio === 'hora') {
+        // Usar Google Maps para mostrar el marcador de recogida
+        this.googleMapsService.addPickupMarker({ lat, lng });
+        this.googleMapsService.centerMap({ lat, lng });
+      }
     }
   }
   handleDestinationChange(place: google.maps.places.PlaceResult) {
@@ -97,6 +122,13 @@ export class OneComponent implements OnInit, AfterViewInit {
       const lng = location.lng();
       this.destinationCoords = [lng, lat];
     }
+  }
+
+  procesarServicioPorHora() {
+    // Este método ya no es necesario ya que la lógica se movió a onSubmit
+    // Se mantiene por compatibilidad pero no debería ser llamado directamente
+    console.warn('procesarServicioPorHora() está obsoleto. Usa onSubmit() en su lugar.');
+    this.onSubmit(new Event('submit'));
   }
   private saveSubmissionState(): void {
     const state = {
@@ -165,69 +197,87 @@ export class OneComponent implements OnInit, AfterViewInit {
       if (this.originInput?.nativeElement && this.destinationInput?.nativeElement) {
         this.googleMapsService.setupAutocomplete(
           this.originInput.nativeElement,
-          this.destinationInput.nativeElement
+          this.tipoServicio !== 'hora' ? this.destinationInput.nativeElement : undefined
         );
+  
+        if (this.tipoServicio === 'hora') {
+          const autocomplete = new google.maps.places.Autocomplete(this.originInput.nativeElement, {
+            types: ['geocode'],
+            fields: ['geometry', 'formatted_address']
+          });
+  
+          autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            if (place.geometry?.location) {
+              const lat = place.geometry.location.lat();
+              const lng = place.geometry.location.lng();
+              this.originCoords = [lng, lat];
+              this.origin = place.formatted_address || 'Ubicación seleccionada';
+  
+              this.googleMapsService.addPickupMarker({ lat, lng });
+              this.googleMapsService.centerMap({ lat, lng });
+            }
+          });
+        }
       } else {
-        setTimeout(checkElements, 300); // vuelve a intentar hasta que estén listos
+        setTimeout(checkElements, 300);
       }
     };
     checkElements();
   }
-
-  private initializeAutocomplete(): void {
-    if (!this.originInput?.nativeElement || !this.destinationInput?.nativeElement) return;
-
-    try {
-      const originAutocomplete = new google.maps.places.Autocomplete(this.originInput.nativeElement, {
-        types: ['establishment'],
-        fields: ['formatted_address', 'geometry']
-      });
-
-      originAutocomplete.addListener('place_changed', () => {
-        // ❌ No modificar si tipo aeropuerto y ya hay coordenadas
-        if (this.tipoServicio === 'aeropuerto' || this.originCoords) return;
-
-        const place = originAutocomplete.getPlace();
-        if (place.geometry?.location) {
-          const lat = place.geometry.location.lat();
-          const lng = place.geometry.location.lng();
-          this.originPlace = place;
+  
+  
+  onPickupBlur(event: FocusEvent): void {
+    if (this.tipoServicio === 'hora') {
+      const input = event.target as HTMLInputElement;
+      const address = input.value.trim();
+  
+      // Validación previa
+      if (!address || address.length < 4) {
+        Swal.fire({
+          title: 'Dirección inválida',
+          text: 'Por favor escribe una dirección más específica.',
+          icon: 'warning',
+          confirmButtonText: 'Entendido',
+          buttonsStyling: false,
+          customClass: { confirmButton: 'confirmar' }
+        });
+        return;
+      }
+  
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ address }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+          const location = results[0].geometry.location;
+          const lat = location.lat();
+          const lng = location.lng();
           this.originCoords = [lng, lat];
-          this.origin = place.formatted_address || 'Origen seleccionado';
+          this.googleMapsService.addPickupMarker({ lat, lng });
+          this.googleMapsService.centerMap({ lat, lng });
+        } else {
+          Swal.fire({
+            title: 'Dirección no encontrada',
+            text: 'No pudimos encontrar la ubicación ingresada. Intenta con una dirección más precisa.',
+            icon: 'warning',
+            confirmButtonText: 'Entendido',
+            buttonsStyling: false,
+            customClass: { confirmButton: 'confirmar' }
+          });
         }
       });
-
-      const destinationAutocomplete = new google.maps.places.Autocomplete(this.destinationInput.nativeElement, {
-        types: ['establishment'],
-        fields: ['formatted_address', 'geometry']
-      });
-
-      destinationAutocomplete.addListener('place_changed', () => {
-        // ❌ Evitar sobrescribir si ya hay coordenadas y tipo es aeropuerto
-        if (this.tipoServicio === 'aeropuerto' && this.destinationCoords) return;
-
-        const place = destinationAutocomplete.getPlace();
-        if (place.geometry?.location) {
-          const lat = place.geometry.location.lat();
-          const lng = place.geometry.location.lng();
-          this.destinationPlace = place;
-          this.destinationCoords = [lng, lat];
-          this.destination = place.formatted_address || 'Destino seleccionado';
-        }
-      });
-    } catch (error) {
-      console.error('Error al inicializar Google Autocomplete:', error);
     }
   }
+  
+
 
   seleccionarTipoServicio(tipo: 'aeropuerto' | 'punto' | 'hora') {
     this.tipoServicio = tipo;
     this.destination = '';
     this.destinationCoords = undefined;
-
+  
     if (tipo === 'aeropuerto') {
       this.origin = this.nombreAeropuerto;
-      this.originCoords = [-99.0721, 19.4361]; // Aeropuerto CDMX (Benito Juárez)
+      this.originCoords = [-99.0721, 19.4361]; // CDMX
       this.originPlace = {
         formatted_address: this.nombreAeropuerto,
         geometry: {
@@ -241,7 +291,14 @@ export class OneComponent implements OnInit, AfterViewInit {
       this.origin = '';
       this.originCoords = undefined;
     }
+  
+    this.actualizarVehiculoRecomendado(); // <-- ✅ AÑADE ESTO AQUÍ
+  
+    if (tipo === 'hora') {
+      setTimeout(() => this.initPickupAutocomplete(), 300);
+    }
   }
+  
 
   vehiculoDisponible(tipo: string): boolean {
     return this.vehiculoSeleccionado === tipo;
@@ -306,65 +363,97 @@ export class OneComponent implements OnInit, AfterViewInit {
     try {
       await this.guardarDatos();
 
-      this.googleMapsService.calcularRuta(async (distanceKm, originText, destinationText) => {
-        try {
-          this.distanciaKm = distanceKm;
-          this.origin = originText;
-          this.destination = destinationText;
+      if (this.tipoServicio === 'hora') {
+        // Para servicio por hora, no necesitamos calcular ruta
+        const travelData = {
+          tipoServicio: this.tipoServicio,
+          vehiculoSeleccionado: this.vehiculoSeleccionado,
+          origin: this.origin,
+          destination: 'Servicio por hora',
+          passengerCount: this.passengerCount,
+          maletaCount: this.maletaCount,
+          sillasBebe: this.sillasBebe,
+          fechaIda: this.fechaIda,
+          horaIda: this.horaIda,
+          horasContratadas: this.horasContratadas,
+          distanciaKm: 0, // No aplica para servicio por hora
+          timestamp: new Date().getTime()
+        };
 
-          const travelData = {
-            tipoServicio: this.tipoServicio,
-            vehiculoSeleccionado: this.vehiculoSeleccionado,
-            origin: this.origin,
-            destination: this.destination,
-            passengerCount: this.passengerCount,
-            maletaCount: this.maletaCount,
-            fechaIda: this.fechaIda,
-            sillasBebe: this.sillasBebe,
-            horaIda: this.horaIda,
-            fechaVuelta: this.fechaVuelta,
-            horaVuelta: this.horaVuelta,
-            numeroVuelo: this.numeroVuelo,
-            tipoViaje: this.tipoViaje,
-            horasContratadas: this.horasContratadas,
-            distanciaKm: distanceKm,
-            timestamp: new Date().getTime()
-          };
+        this.travelData.setTravelData(this.origin, 'Servicio por hora');
+        this.cotizadorService.setDistanciaKm(0);
+        localStorage.setItem('datosCotizador', JSON.stringify(travelData));
+        await this.guardarDatos();
 
-          this.travelData.setTravelData(this.origin, this.destination);
-          this.cotizadorService.setDistanciaKm(distanceKm);
-          localStorage.setItem('datosCotizador', JSON.stringify(travelData));
-          this.guardarDatos();
+        // Marcar el formulario como enviado
+        this.formSubmitted = true;
+        this.isSubmitting = false;
+        this.saveSubmissionState();
 
-          // Marcar el formulario como enviado
-          this.formSubmitted = true;
-          this.isSubmitting = false;
-          this.saveSubmissionState();
+        // Navegar a la siguiente ruta
+        this.router.navigate(['/two']);
+      } else {
+        // Para aeropuerto y punto a punto, calcular ruta
+        this.googleMapsService.calcularRuta(async (distanceKm, originText, destinationText) => {
+          try {
+            this.distanciaKm = distanceKm;
+            this.origin = originText;
+            this.destination = destinationText;
 
-          // Navegar a la siguiente ruta
-          this.virtualRouterService.setActiveRoute('two');
+            const travelData = {
+              tipoServicio: this.tipoServicio,
+              vehiculoSeleccionado: this.vehiculoSeleccionado,
+              origin: this.origin,
+              destination: this.destination,
+              passengerCount: this.passengerCount,
+              maletaCount: this.maletaCount,
+              fechaIda: this.fechaIda,
+              sillasBebe: this.sillasBebe,
+              horaIda: this.horaIda,
+              fechaVuelta: this.fechaVuelta,
+              horaVuelta: this.horaVuelta,
+              numeroVuelo: this.numeroVuelo,
+              tipoViaje: this.tipoViaje,
+              horasContratadas: this.horasContratadas,
+              distanciaKm: distanceKm,
+              timestamp: new Date().getTime()
+            };
 
-        } catch (error) {
-          console.error('Error al procesar la solicitud:', error);
-          this.isSubmitting = false;
-          await Swal.fire({
-            title: 'Error',
-            text: 'Ocurrió un error al procesar tu solicitud.',
-            icon: 'error',
-            confirmButtonText: 'Entendido',
-            buttonsStyling: false,
-            customClass: {
-              confirmButton: 'confirmar'
-            }
-          });
-        }
-      });
+            this.travelData.setTravelData(this.origin, this.destination);
+            this.cotizadorService.setDistanciaKm(distanceKm);
+            localStorage.setItem('datosCotizador', JSON.stringify(travelData));
+            await this.guardarDatos();
+
+            // Marcar el formulario como enviado
+            this.formSubmitted = true;
+            this.isSubmitting = false;
+            this.saveSubmissionState();
+
+            // Navegar a la siguiente ruta
+            this.router.navigate(['/two']);
+
+          } catch (error) {
+            console.error('Error al procesar la solicitud:', error);
+            this.isSubmitting = false;
+            await Swal.fire({
+              title: 'Error',
+              text: 'Ocurrió un error al procesar tu solicitud.',
+              icon: 'error',
+              confirmButtonText: 'Entendido',
+              buttonsStyling: false,
+              customClass: {
+                confirmButton: 'confirmar'
+              }
+            });
+          }
+        });
+      }
     } catch (error) {
-      console.error('Error al calcular la ruta:', error);
+      console.error('Error al procesar el formulario:', error);
       this.isSubmitting = false;
       await Swal.fire({
         title: 'Error',
-        text: 'No se pudo calcular la ruta. Por favor, verifica las direcciones e intenta nuevamente.',
+        text: 'Ocurrió un error al procesar el formulario. Por favor, verifica los datos e intenta nuevamente.',
         icon: 'error',
         confirmButtonText: 'Entendido',
         buttonsStyling: false,

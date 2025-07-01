@@ -86,19 +86,20 @@
                   <label>Vehículo seleccionado: <strong>{{vehiculoSeleccionado | titlecase}}</strong></label>
                 </div>
 
-                <div class="pick-up positrgb(212, 48, 48)ion-relative">
-                <span>Origen</span>
+                <div class="pick-up position-relative">
+                <span>{{ tipoServicio === 'hora' ? 'Lugar de recogida' : 'Origen' }}</span>
                 <i class="flaticon-aim icon-aim"></i>
-                <input
-                #originInput
-                id="originInput"
-                type="text"
-                [(ngModel)]="origin"
-                name="origin"
-                placeholder="Origen"
-                autocomplete="off"
-                class="form-control"
-                  >
+              <input
+  #originInput
+  id="originInput"
+  type="text"
+  [(ngModel)]="origin"
+  name="origin"
+  placeholder="{{ tipoServicio === 'hora' ? 'Indica el punto de recogida' : 'Origen' }}"
+ 
+  [attr.autocomplete]="tipoServicio === 'hora' ? 'off' : 'on'"
+  class="form-control"
+  (blur)="onPickupBlur($event)" />
                 <i class="flaticon-search icon-search"></i>
               </div>
               
@@ -199,10 +200,9 @@
                 <button 
                   class="btn" 
                   type="submit" 
-                  [disabled]="!cotizacionForm.form.valid || isSubmitting || hasExistingFormData()"
-                  (click)="guardarDatos()">
-                  <span *ngIf="!isSubmitting">Cotizar ahora</span>
-                  <span *ngIf="isSubmitting">Procesando...</span>
+                  [disabled]="isSubmitting || formSubmitted"
+                  [class.disabled]="isSubmitting || formSubmitted">
+                  {{ isSubmitting ? 'Procesando...' : 'Continuar' }}
                 </button>
                 <div class="tooltip" *ngIf="hasExistingFormData()">
                   Por favor reinicia el formulario para cotizar de nuevo

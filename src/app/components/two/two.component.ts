@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CotizadorService } from '../../services/cotizador.service';
 import { TramosService } from '../../services/tramos.service';
-import { VirtualRouterService } from '../../services/virtual-router.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -24,7 +23,6 @@ export class TwoComponent implements OnInit {
   constructor(
     public cotizadorService: CotizadorService,
     private tramosService: TramosService,
-    private virtualRouter: VirtualRouterService,
     private router: Router
   ) {}
   obtenerClaveVehiculo(tipo: string, subtipo: string): string {
@@ -252,7 +250,6 @@ export class TwoComponent implements OnInit {
 
   seleccionarAhora() {
     this.guardarSeleccion();
-    this.virtualRouter.setActiveRoute('three');
     this.router.navigate(['/three']);
   }
   

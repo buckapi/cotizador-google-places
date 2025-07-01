@@ -1,0 +1,244 @@
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  ViewChild,
+  ElementRef
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
+import { TravelDataService } from '../../services/travel-data.service';
+import { MapboxService } from '../../services/mapbox.service';
+import { VirtualRouterService } from '../../services/virtual-router.service';
+import { CotizadorService } from '../../services/cotizador.service';
+import { TramosService } from '../../services/tramos.service';
+import { firstValueFrom } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { GoogleMapsService } from '../../services/google-maps.service';
+
+@Component({
+  selector: 'app-one',
+  standalone: true,
+  imports: [FormsModule, CommonModule],
+  templateUrl: './one.component.html',
+  styleUrls: ['./one.component.css']
+})
+export class OneComponent implements OnInit, AfterViewInit {
+  @ViewChild('originInput', { static: false }) originInput!: ElementRef;
+  @ViewChild('destinationInput', { static: false }) destinationInput!: ElementRef;
+  @ViewChild('pickupLocationInput', { static: false }) pickupLocationInput!: ElementRef;
+  @ViewChild('pickupLocationInput', { static: false }) pickupLocationInput!: ElementRef;
+  private originPlace: google.maps.places.PlaceResult | null = null;
+  private destinationPlace: google.maps.places.PlaceResult | null = null;
+  private readySubject = new BehaviorSubject<boolean>(false);
+  public ready$: Observable<boolean> = this.readySubject.asObservable();
+  sillasBebe: number = 0;
+
+  tipoServicio: 'aeropuerto' | 'punto' | 'hora' | null = null;
+  vehiculoSeleccionado: string = 'sedan';
+  isSubmitting: boolean = false;
+  formSubmitted: boolean = false;
+
+  origin = '';
+  destination = '';
+  pickupLocation = '';
+  pickupLocation = '';
+  passengerCount = 1;
+  maletaCount = 0;
+  distanciaKm: number = 0;
+  fechaIda = '';
+  horaIda = '';
+  fechaVuelta = '';
+  horaVuelta = '';
+  numeroVuelo = '';
+  tipoViaje: 'solo_ida' | 'ida_vuelta' = 'solo_ida';
+  horasContratadas = 2;
+
+  originCoords?: [number, number];
+  destinationCoords?: [number, number];
+  excesoLimite = false;
+
+  readonly MAX_PERSONAS = 16;
+  readonly MAX_MALETAS = 18;
+  readonly coordenadasAeropuertoCuliacan: [number, number] = [-107.4702, 24.7645];
+  readonly nombreAeropuerto = 'Aeropuerto de Culiacán';
+
+  constructor(
+    private googleMapsService: GoogleMapsService,
+    private travelData: TravelDataService,
+    private mapboxService: MapboxService,
+    public virtualRouterService: VirtualRouterService,
+    public cotizadorService: CotizadorService,
+    public tramosService: TramosService
+  ) {}
+  increaseSillasBebe(): void {
+    if (this.sillasBebe < 5) { // puedes ajustar el límite máximo
+      this.sillasBebe++;
+    }
+  }
+  
+  decreaseSillasBebe(): void {
+    if (this.sillasBebe > 0) {
+      this.sillasBebe--;
+    }
+  }
+  
+  handleOriginChange(place: google.maps.places.PlaceResult) {
+    const location = place.geometry?.location;
+    if (location) {
+      const lat = location.lat();
+      const lng = location.lng();
+      this.originCoords = [lng, lat];
+      
+      // Si es un servicio por hora, actualizar el mapa con el marcador de recogida
+      if (this.tipoServicio === 'hora') {
+        // Usar Google Maps para mostrar el marcador de recogida
+        this.googleMapsService.addPickupMarker({ lat, lng });
+        this.googleMapsService.centerMap({ lat, lng });
+      }
+    }
+  }
+  handleDestinationChange(place: google.maps.places.PlaceResult) {
+    const location = place.geometry?.location;
+    if (location) {
+      const lat = location.lat();
+      const lng = location.lng();
+      this.destinationCoords = [lng, lat];
+    }
+  }
+
+  procesarServicioPorHora() {
+    if (!this.originCoords || this.originCoords.length !== 2) {
+      alert('Por favor seleccione un lugar de recogida válido');
+      return;
+    }
+
+    if (this.horasContratadas < 2) {
+      alert('El servicio por hora requiere un mínimo de 2 horas');
+      return;
+    }
+
+    this.isSubmitting = true;
+    
+    // Aquí puedes agregar la lógica para procesar el servicio por hora
+    console.log('Procesando servicio por hora en:', this.originCoords);
+    
+    // Actualizar el marcador en el mapa para el servicio por hora
+    const [lng, lat] = this.originCoords;
+    this.googleMapsService.addPickupMarker({ lat, lng });
+    this.googleMapsService.centerMap({ lat, lng });
+    
+    // Simular procesamiento
+    setTimeout(() => {
+      this.isSubmitting = false;
+      // Aquí podrías redirigir a otra página o mostrar un mensaje de éxito
+      alert('Solicitud de servicio por hora enviada correctamente');
+    }, 1500);
+  }
+  private saveSubmissionState(): void {
+    const state = {
+      submitted: this.formSubmitted,
+      submitting: this.isSubmitting,
+      timestamp: new Date().getTime()
+    };
+    localStorage.setItem('formSubmissionState', JSON.stringify(state));
+  }
+
+  private clearSubmissionState(): void {
+    localStorage.removeItem('formSubmissionState');
+    this.formSubmitted = false;
+    this.isSubmitting = false;
+  }
+
+  hasExistingFormData(): boolean {
+    const savedState = localStorage.getItem('formSubmissionState');
+    if (!savedState) return false;
+    
+    try {
+      const state = JSON.parse(savedState);
+      // Check if the state is recent (less than 1 hour old)
+      const oneHourAgo = new Date().getTime() - (60 * 60 * 1000);
+      return !!(state.timestamp && state.timestamp > oneHourAgo && state.submitted);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  resetForm(): void {
+    // Clear the form and submission state
+    this.clearSubmissionState();
+    // Reset form fields
+    this.origin = '';
+    this.destination = '';
+    this.passengerCount = 1;
+    this.maletaCount = 0;
+  }
+
+  ngOnInit(): void {
+    this.tramosService.cargarTramos();
+    this.recuperarDatosGuardados();
+    // Verificar si hay un estado de envío guardado
+    const savedState = localStorage.getItem('formSubmissionState');
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        // Verificar si el estado es reciente (menos de 1 hora)
+        const oneHourAgo = new Date().getTime() - (60 * 60 * 1000);
+        if (state.timestamp && state.timestamp > oneHourAgo) {
+          this.formSubmitted = state.submitted;
+          this.isSubmitting = state.submitting;
+        } else {
+          this.clearSubmissionState();
+        }
+      } catch (e) {
+        console.error('Error al cargar el estado del formulario:', e);
+        this.clearSubmissionState();
+      }
+    }
+  }
+
+  ngAfterViewInit(): void {
+    const checkElements = () => {
+      if (this.originInput?.nativeElement && this.destinationInput?.nativeElement) {
+        this.googleMapsService.setupAutocomplete(
+          this.originInput.nativeElement,
+          this.destinationInput.nativeElement
+        );
+      } else {
+        setTimeout(checkElements, 300); // vuelve a intentar hasta que estén listos
+      }
+    };
+    checkElements();
+  }
+
+  private initializeAutocomplete(): void {
+    // Initialize origin autocomplete (for aeropuerto and punto services)
+    if (this.originInput?.nativeElement) {
+      const originAutocomplete = new google.maps.places.Autocomplete(this.originInput.nativeElement, {
+        types: ['establishment', 'geocode'],
+        fields: ['formatted_address', 'geometry', 'name', 'place_id']
+      });
+
+      originAutocomplete.addListener('place_changed', () => {
+        const place = originAutocomplete.getPlace();
+        
+        if (place.geometry?.location) {
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+          this.originPlace = place;
+          this.originCoords = [lng, lat];
+          this.origin = place.formatted_address || place.name || 'Ubicación seleccionada';
+        } else {
+    } else {
+      setTimeout(checkElements, 300); // vuelve a intentar hasta que estén listos
+    }
+  };
+  checkElements();
+        console.error('Error al recuperar datos guardados:', e);
+      }
+    }
+  }
+}
