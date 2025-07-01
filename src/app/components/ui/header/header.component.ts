@@ -1,21 +1,39 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { VirtualRouterService } from '../../../services/virtual-router.service';
+import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { TravelDataService } from '../../../services/travel-data.service';
+import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit, OnDestroy {
+  currentRoute: string = '';
+  private routerSubscription: Subscription | undefined;
   constructor(
-    public virtualRouterService: VirtualRouterService,
-    private travelDataService: TravelDataService
+    private travelDataService: TravelDataService,
+    public router: Router
   ) { }
+
+  ngOnInit() {
+    this.currentRoute = this.router.url;
+    this.routerSubscription = this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.currentRoute = event.url;
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+  }
 
   hasSubmittedForm(): boolean {
     const savedState = localStorage.getItem('formSubmissionState');
@@ -48,8 +66,9 @@ export class HeaderComponent {
   
     if (result.isConfirmed) {
       this.travelDataService.resetAllData();
+      this.router.navigate(['/one']);
       localStorage.clear();
-      this.virtualRouterService.setActiveRoute('one');
+      this.router.navigate(['/one']);
   
       await Swal.fire({
         title: '¡Reiniciado!',

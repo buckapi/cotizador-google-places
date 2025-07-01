@@ -18,21 +18,21 @@
               <i class="fas fa-redo-alt me-1"></i> Reiniciar
             </button>
     
-            <a [ngClass]="{'active-route': virtualRouterService.activeroute === 'one'}" 
-               class="step-button"
-               (click)="virtualRouterService.setActiveRoute('one')">
+            <a [routerLink]="['/one']" 
+               [class.active-route]="currentRoute === '/one'"
+               class="step-button">
               <span>1</span>
             </a>
             <a *ngIf="hasSubmittedForm()"
-               [ngClass]="{'active-route': virtualRouterService.activeroute === 'two'}" 
-               class="step-button"
-               (click)="virtualRouterService.setActiveRoute('two')">
+               [routerLink]="['/two']"
+               [class.active-route]="currentRoute === '/two'"
+               class="step-button">
               <span>2</span>
             </a>
             <a *ngIf="hasSubmittedForm()"
-               [ngClass]="{'active-route': virtualRouterService.activeroute === 'three'}" 
-               class="step-button"
-               (click)="virtualRouterService.setActiveRoute('three')">
+               [routerLink]="['/three']"
+               [class.active-route]="currentRoute === '/three'"
+               class="step-button">
               <span>3</span>
             </a>
           </div>
