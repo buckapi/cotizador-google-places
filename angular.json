@@ -16,40 +16,42 @@
             "outputPath": "dist/cotizador",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
                 "glob": "**/*",
                 "input": "public"
-              }
+              },
+              "src/assets",
+              "src/manifest.webmanifest",
+              "src/favicon.ico"
             ],
             "styles": [
               "src/styles.css",
-               "node_modules/mapbox-gl/dist/mapbox-gl.css",
-               "public/assets/font/flaticon_mycollection.css"
+              "node_modules/mapbox-gl/dist/mapbox-gl.css",
+              "public/assets/font/flaticon_mycollection.css"
             ],
             "scripts": []
           },
           "configurations": {
-            "production": {
-           "budgets": [
-  {
-    "type": "initial",
-    "maximumWarning": "2MB",
-    "maximumError": "3MB"
-  },
-  {
-    "type": "anyComponentStyle",
-    "maximumWarning": "4kB",
-    "maximumError": "8kB"
-  }
-]
+          "production": {
+  "outputHashing": "all",
+  "serviceWorker": "ngsw-config.json",
+  "budgets": [
+    {
+      "type": "initial",
+      "maximumWarning": "2MB",
+      "maximumError": "3MB"
+    },
+    {
+      "type": "anyComponentStyle",
+      "maximumWarning": "4kB",
+      "maximumError": "8kB"
+    }
+  ]
+}
 ,
-              "outputHashing": "all"
-            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
