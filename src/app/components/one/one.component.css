@@ -258,3 +258,24 @@
     background-color: rgba(50, 50, 50, 0.85);
   }
   
+
+  .btn-continuar {
+    width: 100%;
+    background-color: #f6c700;
+    color: #000;
+    font-weight: 00;
+    border: none;
+    padding: 12px 30px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  .btn-continuar:hover {
+    background-color: #000;
+    color: #fff;
+  }
+  
+  
+  

@@ -73,3 +73,20 @@
   background-color: #ffffff;
   color: #000000;
 }
+.tipo-servicio {
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  width: 110px;
+  transition: all 0.2s ease-in-out;
+}
+
+.tipo-servicio:hover {
+  border-color: #ccc;
+}
+
+.tipo-servicio.active {
+  border-color: #f6c700;
+  background-color: #fffbe6;
+}

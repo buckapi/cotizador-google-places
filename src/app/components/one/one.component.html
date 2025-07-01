@@ -196,9 +196,9 @@
                 </div>
               </div>
 
-              <div class="button-container" [class.has-tooltip]="hasExistingFormData()">
+              <div *ngIf="isFormularioValido()" class="button-container" [class.has-tooltip]="hasExistingFormData()">
                 <button 
-                  class="btn" 
+                  class="btn-continuar" 
                   type="submit" 
                   [disabled]="isSubmitting || formSubmitted"
                   [class.disabled]="isSubmitting || formSubmitted">
@@ -208,6 +208,7 @@
                   Por favor reinicia el formulario para cotizar de nuevo
                 </div>
               </div>
+              
             </div>
           </form>
           </div>

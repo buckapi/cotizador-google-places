@@ -352,7 +352,16 @@ export class OneComponent implements OnInit, AfterViewInit {
     }
     this.vehiculoSeleccionado = 'Van 16 asientos';
   }
-
+  isFormularioValido(): boolean {
+    if (!this.origin || this.origin.trim() === '') {
+      return false;
+    }
+    if (this.tipoServicio !== 'hora' && (!this.destination || this.destination.trim() === '')) {
+      return false;
+    }
+    return true;
+  }
+  
   async onSubmit(event: Event) {
     event.preventDefault();
     if (this.isSubmitting || this.formSubmitted) return;
