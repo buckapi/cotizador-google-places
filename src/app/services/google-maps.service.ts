@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import Swal from 'sweetalert2';
-
+declare const google: any;
 @Injectable({ providedIn: 'root' })
 export class GoogleMapsService {
+  
   private map!: google.maps.Map;
   private markers: google.maps.Marker[] = [];
   private stylesEnabled = true;

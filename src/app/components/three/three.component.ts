@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
-
+declare const google: any;
 @Component({
   selector: 'app-three',
   standalone: true,
