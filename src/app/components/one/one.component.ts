@@ -61,6 +61,8 @@ export class OneComponent implements OnInit, AfterViewInit {
   readonly coordenadasAeropuertoCuliacan: [number, number] = [-107.4702, 24.7645];
   readonly nombreAeropuerto = 'Aeropuerto de Culiacán';
 
+  tipoServicioPredefinido: boolean = false;
+
   constructor(
     public virtualRouterService: VirtualRouterService ,
     private googleMapsService: GoogleMapsService,
@@ -171,7 +173,7 @@ export class OneComponent implements OnInit, AfterViewInit {
     this.maletaCount = 0;
   }
 
-  ngOnInit(): void {
+  /* ngOnInit(): void {
     this.tramosService.cargarTramos();
     this.recuperarDatosGuardados();
     // Verificar si hay un estado de envío guardado
@@ -192,8 +194,39 @@ export class OneComponent implements OnInit, AfterViewInit {
         this.clearSubmissionState();
       }
     }
-  }
+  } */
 
+    ngOnInit(): void {
+      this.tramosService.cargarTramos();
+      this.recuperarDatosGuardados();
+    
+      // ✅ Detectar query string
+      const params = new URLSearchParams(window.location.search);
+      const tipo = params.get('tipoServicio');
+    
+      if (tipo === 'aeropuerto' || tipo === 'punto' || tipo === 'hora') {
+        this.seleccionarTipoServicio(tipo as 'aeropuerto' | 'punto' | 'hora');
+      }
+    
+      // 👉 Mantener tu lógica previa
+      const savedState = localStorage.getItem('formSubmissionState');
+      if (savedState) {
+        try {
+          const state = JSON.parse(savedState);
+          const oneHourAgo = new Date().getTime() - (60 * 60 * 1000);
+          if (state.timestamp && state.timestamp > oneHourAgo) {
+            this.formSubmitted = state.submitted;
+            this.isSubmitting = state.submitting;
+          } else {
+            this.clearSubmissionState();
+          }
+        } catch (e) {
+          console.error('Error al cargar el estado del formulario:', e);
+          this.clearSubmissionState();
+        }
+      }
+    }
+    
   ngAfterViewInit(): void {
     const checkElements = () => {
       if (this.originInput?.nativeElement && this.destinationInput?.nativeElement) {
@@ -272,7 +305,7 @@ export class OneComponent implements OnInit, AfterViewInit {
   
 
 
-  seleccionarTipoServicio(tipo: 'aeropuerto' | 'punto' | 'hora') {
+  /* seleccionarTipoServicio(tipo: 'aeropuerto' | 'punto' | 'hora') {
     this.tipoServicio = tipo;
     this.destination = '';
     this.destinationCoords = undefined;
@@ -299,9 +332,38 @@ export class OneComponent implements OnInit, AfterViewInit {
     if (tipo === 'hora') {
       setTimeout(() => this.initPickupAutocomplete(), 300);
     }
-  }
+  } */
   
-
+    seleccionarTipoServicio(tipo: 'aeropuerto' | 'punto' | 'hora') {
+      this.tipoServicio = tipo;
+      this.tipoServicioPredefinido = true;
+      this.destination = '';
+      this.destinationCoords = undefined;
+    
+      if (tipo === 'aeropuerto') {
+        this.origin = this.nombreAeropuerto;
+        this.originCoords = [-99.0721, 19.4361];
+        this.originPlace = {
+          formatted_address: this.nombreAeropuerto,
+          geometry: {
+            location: {
+              lat: () => 19.4361,
+              lng: () => -99.0721
+            }
+          }
+        } as google.maps.places.PlaceResult;
+      } else {
+        this.origin = '';
+        this.originCoords = undefined;
+      }
+    
+      this.actualizarVehiculoRecomendado();
+    
+      if (tipo === 'hora') {
+        setTimeout(() => this.initPickupAutocomplete(), 300);
+      }
+    }
+    
   vehiculoDisponible(tipo: string): boolean {
     return this.vehiculoSeleccionado === tipo;
   }
