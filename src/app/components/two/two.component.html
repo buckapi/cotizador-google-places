@@ -83,16 +83,25 @@
                 </li>
                 <li style="font-size: 1rem !important;">
                   <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
-                  Base (2h / 40 km): ${{ h.base | number:'1.0-0' }}
+                  Maletas: {{ h.maletas }}
                 </li>
                 <li style="font-size: 1rem !important;">
                   <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
-                  Adicional por hora (20 km): ${{ h.adicional | number:'1.0-0' }}
+                  Sillas bebé: {{ h.sillas }}
                 </li>
                 <li style="font-size: 1rem !important;">
                   <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
                   Máximo: {{ h.tiempoMax }}
                 </li>
+                <!-- <li style="font-size: 1rem !important;">
+                  <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
+                  Base (2h / 40 km): ${{ h.base | number:'1.0-0' }}
+                </li>
+                <li style="font-size: 1rem !important;">
+                  <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
+                  Adicional por hora (20 km): ${{ h.adicional | number:'1.0-0' }}
+                </li> -->
+                
               </ul>
             </div>
           
@@ -108,14 +117,18 @@
                   <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
                   Maletas: {{ d.maletas }}
                 </li>
-                <li *ngIf="d.base" style="font-size: 1rem !important;">
+                <li style="font-size: 1rem !important;">
+                  <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
+                  Sillas bebé: {{ d.sillas }}
+                </li>
+                <!-- <li *ngIf="d.base" style="font-size: 1rem !important;">
                   <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
                   Base (hasta 10 km): ${{ d.base | number:'1.0-0' }}
                 </li>
                 <li *ngIf="d.adicional" style="font-size: 1rem !important;">
                   <i class="fa-solid fa-check text-warning" style="font-size: 2rem !important;"></i>
                   Adicional por km extra: ${{ d.adicional | number:'1.0-0' }}
-                </li>
+                </li> -->
               </ul>
             </div>
           </div>

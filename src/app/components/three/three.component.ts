@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
 import { VirtualRouterService } from '../../services/virtual-router.service';
+import { EmailService } from '../../services/email.service';
 
 @Component({
   selector: 'app-three',
@@ -38,7 +39,8 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
     private cotizadorService: CotizadorService,
     private cdr: ChangeDetectorRef,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private emailService: EmailService
   ) {}
 
   toggleMapStyles(): void {
@@ -291,8 +293,7 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
 
   async procesarSolicitud(): Promise<void> {
     console.log('Iniciando proceso de pago...', this.viajeData);
-    
-    // Mostrar formulario para recolectar datos del cliente
+  
     const { value: formValues, isConfirmed } = await Swal.fire({
       title: 'Información de pago',
       html: `
@@ -329,73 +330,106 @@ export class ThreeComponent implements AfterViewInit, OnDestroy {
       preConfirm: () => {
         const nameInput = document.getElementById('swal-input1') as HTMLInputElement;
         const emailInput = document.getElementById('swal-input2') as HTMLInputElement;
-        
+  
         if (!nameInput.value || !emailInput.value) {
           Swal.showValidationMessage('Por favor completa todos los campos');
           return false;
         }
-        
+  
         if (!/^\S+@\S+\.\S+$/.test(emailInput.value)) {
           Swal.showValidationMessage('Por favor ingresa un correo electrónico válido');
           return false;
         }
-        
+  
         return {
           name: nameInput.value.trim(),
           email: emailInput.value.trim()
         };
       }
     });
-
-    // Si el usuario confirma el pago
-    if (isConfirmed && formValues) {
-      try {
-        // Aquí iría la lógica para procesar el pago con Stripe
-        // Por ejemplo:
-        // const paymentResult = await this.stripeService.processPayment({
-        //   amount: this.viajeData.tarifaTotal * 100, // Convertir a centavos
-        //   email: formValues.email,
-        //   name: formValues.name,
-        //   description: `Pago de viaje de ${this.viajeData.origin} a ${this.viajeData.destination}`
-        // });
-
-        // Mostrar confirmación de éxito
-        await Swal.fire({
-          title: '¡Pago exitoso!',
-          html: `
-            <div class="text-center">
-              <i class="fas fa-check-circle text-5xl text-green-500 mb-4"></i>
-              <p class="mb-2">Hemos recibido tu pago correctamente.</p>
-              <p class="text-sm text-gray-600">Hemos enviado los detalles a <strong>${formValues.email}</strong></p>
-            </div>
-          `,
-          icon: 'success',
-          confirmButtonText: 'Aceptar',
-          buttonsStyling: false,
-          customClass: {
-            confirmButton: 'confirmar'
-          }
-        });
-
-        // Aquí podrías redirigir al usuario o limpiar el formulario
-        this.volver();
-      } catch (error) {
-        console.error('Error procesando el pago:', error);
-        await Swal.fire({
-          title: 'Error',
-          text: 'Ocurrió un error al procesar tu pago. Por favor intenta de nuevo.',
-          icon: 'error',
-          confirmButtonText: 'Entendido',
-          buttonsStyling: false,
-          customClass: {
-            confirmButton: 'confirmar'
-          }
-        });
-      }
+  
+    if (!isConfirmed || !formValues) return;
+  
+    try {
+      // 👉 Aquí iría tu proceso de pago con Stripe
+  
+      // 🔑 Determina los templateId según el tipo de servicio
+      const clienteTemplateId = this.getClienteTemplateId(this.viajeData.tipoServicio);
+      const adminTemplateId = this.getAdminTemplateId();
+  
+      // ✉️ Construye los parámetros comunes para el email
+      const emailParams = {
+        nombre: formValues.name,
+        correo: formValues.email,
+        origen: this.viajeData.origin,
+        destino: this.viajeData.destination,
+        tarifa: `$${this.viajeData.tarifaTotal?.toFixed(2) || '0.00'} MXN`,
+        fecha: new Date().toLocaleString(),
+        tipoServicio: this.viajeData.tipoServicio
+      };
+  
+      // 👉 Enviar correo al cliente
+      await this.emailService.enviarCorreo(this.viajeData.tipoServicio, {
+        toEmail: formValues.email,
+        toName: formValues.name,
+        templateId: clienteTemplateId,
+        params: emailParams
+      }).toPromise();
+      
+      await this.emailService.enviarCorreoAdmin({
+        toEmail: 'viaztransfer@gmail.com',
+        toName: 'Administrador',
+        templateId: adminTemplateId,
+        params: emailParams
+      }).toPromise();
+      
+      // ✅ Mensaje final
+      await Swal.fire({
+        title: '¡Solicitud exitosa!',
+        html: `
+          <div class="text-center">
+            <i class="fas fa-check-circle text-5xl text-green-500 mb-4"></i>
+            <p class="mb-2">Gracias por tu solicitud de viaje.</p>
+            <p class="text-sm text-gray-600">Hemos enviado los detalles a <strong>${formValues.email}</strong></p>
+          </div>
+        `,
+        icon: 'success',
+        confirmButtonText: 'Aceptar',
+        buttonsStyling: false,
+        customClass: { confirmButton: 'confirmar' }
+      });
+  
+      this.volver();
+  
+    } catch (error) {
+      console.error('Error procesando la solicitud:', error);
+      await Swal.fire({
+        title: 'Error',
+        text: 'Ocurrió un error al procesar tu solicitud. Por favor intenta de nuevo.',
+        icon: 'error',
+        confirmButtonText: 'Entendido',
+        buttonsStyling: false,
+        customClass: { confirmButton: 'confirmar' }
+      });
     }
   }
-
+  
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
+  getClienteTemplateId(tipoServicio: string): number {
+    switch (tipoServicio) {
+      case 'aeropuerto': return 1;
+      case 'punto': return 3;
+      case 'hora': return 4;
+      default: return 1; // Default a aeropuerto si no se reconoce
+    }
+  }
+  
+  getAdminTemplateId(): number {
+    return 2; // El admin siempre recibe la plantilla con ID 2
+  }
+  
+  
+  
 }
