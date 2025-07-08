@@ -173,7 +173,7 @@ export class OneComponent implements OnInit, AfterViewInit {
     this.maletaCount = 0;
   }
 
-   ngOnInit(): void {
+  /* ngOnInit(): void {
     this.tramosService.cargarTramos();
     this.recuperarDatosGuardados();
     // Verificar si hay un estado de envío guardado
@@ -194,9 +194,9 @@ export class OneComponent implements OnInit, AfterViewInit {
         this.clearSubmissionState();
       }
     }
-  } 
+  } */
 
-   /*  ngOnInit(): void {
+    ngOnInit(): void {
       this.tramosService.cargarTramos();
       this.recuperarDatosGuardados();
     
@@ -225,7 +225,8 @@ export class OneComponent implements OnInit, AfterViewInit {
           this.clearSubmissionState();
         }
       }
-    } */
+    }
+    
     
   ngAfterViewInit(): void {
     const checkElements = () => {
@@ -363,6 +364,7 @@ export class OneComponent implements OnInit, AfterViewInit {
         setTimeout(() => this.initPickupAutocomplete(), 300);
       }
     }
+    
     
   vehiculoDisponible(tipo: string): boolean {
     return this.vehiculoSeleccionado === tipo;
